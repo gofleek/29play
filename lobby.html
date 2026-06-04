@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>29 Card Game</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cards">
+<link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;background:#06080d;color:#e8eaf6;overflow-x:hidden;}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.suit-particle{position:absolute;font-size:clamp(18px,3vw,32px);opacity:0;animation:drift linear infinite;}
+@keyframes drift{0%{transform:translateY(100vh) rotate(0);opacity:0}10%{opacity:.12}90%{opacity:.08}100%{transform:translateY(-120px) rotate(360deg);opacity:0}}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:clamp(16px,4vw,40px) clamp(12px,3vw,32px) 60px;}
+.hero{text-align:center;padding:clamp(20px,4vh,44px) 0 clamp(14px,3vh,28px);}
+.hero-title{font-size:clamp(28px,6vw,56px);font-weight:900;letter-spacing:-1px;background:linear-gradient(135deg,#ffd54f,#ff8f00,#ffd54f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:6px;}
+.hero-suits{font-size:clamp(18px,3.5vw,32px);letter-spacing:6px;margin-bottom:10px;opacity:.7;}
+.hero-sub{font-size:clamp(11px,1.8vw,15px);color:#5a8aaa;letter-spacing:.3px;}
+/* NAV BAR */
+.topbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:16px;}
+.btn-nav{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;}
+.btn-login{background:transparent;border:1.5px solid #1c2f50;color:#8ab4f8;}
+.btn-login:hover{border-color:#4a90d9;background:rgba(74,144,217,.1);}
+.btn-register{background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#1a0e00;}
+.btn-logout{background:transparent;border:1.5px solid #3a1500;color:#ff8f00;font-size:12px;}
+.btn-logout:hover{border-color:#ff8f00;}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,213,79,.08);border:1.5px solid rgba(255,213,79,.2);border-radius:50px;padding:6px 14px 6px 10px;}
+.user-pill .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#ffd54f,#ff8f00);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#1a0e00;}
+.user-pill .uname{font-size:13px;font-weight:700;color:#ffd54f;}
+.user-pill .pts{font-size:11px;color:#ff8f00;}
+.btn-dashboard{padding:6px 12px;border-radius:7px;border:1.5px solid rgba(255,143,0,.3);background:transparent;color:#ff8f00;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-dashboard:hover{border-color:#ff8f00;background:rgba(255,143,0,.08);}
+/* STATS */
+.stats-row{display:flex;gap:clamp(8px,2vw,16px);justify-content:center;flex-wrap:wrap;margin-bottom:clamp(20px,4vh,36px);}
+.stat-pill{background:rgba(15,25,45,.85);border:1px solid #1f3456;border-radius:50px;padding:clamp(8px,1.5vh,12px) clamp(14px,2.5vw,24px);display:flex;align-items:center;gap:10px;}
+.stat-icon{font-size:clamp(16px,2.5vw,22px);}
+.stat-info{display:flex;flex-direction:column;}
+.stat-val{font-size:clamp(16px,2.8vw,24px);font-weight:800;color:#ffd54f;line-height:1;}
+.stat-lbl{font-size:clamp(9px,1.1vw,11px);color:#4a6a8a;letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+/* GRID */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.5vw,26px);}
+@media(max-width:720px){.main-grid{grid-template-columns:1fr;}}
+.panel{background:rgba(10,20,38,.88);border:1.5px solid #1c2f50;border-radius:16px;padding:clamp(16px,3vh,26px) clamp(14px,3vw,24px);backdrop-filter:blur(8px);}
+.panel-title{font-size:clamp(12px,1.8vw,15px);font-weight:700;color:#8ab4f8;letter-spacing:.4px;margin-bottom:clamp(12px,2vh,18px);display:flex;align-items:center;gap:8px;}
+.panel-title .tico{font-size:clamp(14px,2vw,18px);}
+/* INPUTS */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;color:#4a6a8a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-weight:600;}
+.field input,.field select{width:100%;padding:clamp(9px,1.5vh,12px) clamp(10px,1.8vw,14px);background:#070f1c;border:1.5px solid #1c2f50;border-radius:9px;color:#e8eaf6;font-size:clamp(13px,1.8vw,15px);outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:#4a90d9;}
+.field input::placeholder{color:#2a4060;}
+.hint-txt{font-size:11px;color:#2a4060;margin-top:4px;}
+.btn-primary{width:100%;margin-top:14px;padding:clamp(11px,2vh,14px);border:none;border-radius:10px;background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#1a0e00;font-size:clamp(13px,1.8vw,15px);font-weight:800;cursor:pointer;letter-spacing:.2px;transition:opacity .15s,transform .1s;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn-secondary{width:100%;margin-top:10px;padding:clamp(10px,1.8vh,13px);border:1.5px solid #1c2f50;border-radius:10px;background:transparent;color:#8ab4f8;font-size:clamp(12px,1.7vw,14px);font-weight:700;cursor:pointer;transition:border-color .15s,background .15s;}
+.btn-secondary:hover{border-color:#4a90d9;background:rgba(74,144,217,.08);}
+.or-divider{display:flex;align-items:center;gap:10px;margin:14px 0;}
+.or-divider::before,.or-divider::after{content:'';flex:1;border-top:1px solid #1c2f50;}
+.or-divider span{font-size:11px;color:#2a4060;letter-spacing:.5px;}
+/* LOCK WALL */
+.login-wall{text-align:center;padding:20px 10px;border:1.5px dashed #1c2f50;border-radius:12px;margin-top:8px;}
+.login-wall p{font-size:13px;color:#4a6a8a;margin-bottom:12px;}
+.login-wall-btns{display:flex;gap:8px;justify-content:center;}
+.lwbtn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;}
+.lwbtn-login{background:transparent;border:1.5px solid #1c2f50;color:#8ab4f8;}
+.lwbtn-reg{background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#1a0e00;}
+/* ROOM CUSTOMIZER */
+.theme-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.color-field{display:flex;align-items:center;gap:8px;}
+.color-field input[type=color]{width:36px;height:36px;border:2px solid #1c2f50;border-radius:8px;cursor:pointer;background:none;padding:2px;}
+.color-field span{font-size:12px;color:#4a6a8a;}
+.img-upload-btn{width:100%;padding:10px;border:1.5px dashed #1c2f50;border-radius:9px;background:transparent;color:#4a6a8a;font-size:12px;cursor:pointer;text-align:center;transition:border-color .15s;}
+.img-upload-btn:hover{border-color:#4a90d9;color:#8ab4f8;}
+.img-preview{width:100%;height:60px;border-radius:8px;object-fit:cover;margin-top:6px;display:none;}
+.conditions-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0e1e34;}
+.conditions-row:last-child{border-bottom:none;}
+.cond-label{font-size:12px;color:#8ab4f8;font-weight:600;}
+.cond-sub{font-size:10px;color:#2a4060;margin-top:2px;}
+.toggle{width:38px;height:22px;background:#0e1e34;border:1.5px solid #1c2f50;border-radius:20px;position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:#1565c0;border-color:#1976d2;}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#4a6a8a;transition:transform .2s,background .2s;}
+.toggle.on::after{transform:translateX(16px);background:#fff;}
+/* COLLAPSIBLE */
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;padding:10px 14px;background:rgba(7,15,28,.6);border-radius:10px;border:1px solid #0e1e34;}
+.collapsible-header span{font-size:13px;font-weight:700;color:#8ab4f8;}
+.collapsible-header .chev{color:#2a4060;transition:transform .2s;}
+.collapsible-header.open .chev{transform:rotate(180deg);}
+.collapsible-body{overflow:hidden;max-height:0;transition:max-height .3s ease;}
+.collapsible-body.open{max-height:600px;}
+/* ROOM LIST */
+.rooms-panel{grid-column:1/-1;}
+.room-list{display:flex;flex-direction:column;gap:10px;margin-top:2px;}
+.room-card{background:rgba(7,15,28,.9);border:1.5px solid #1c2f50;border-radius:12px;padding:clamp(12px,2vh,16px) clamp(14px,2.5vw,20px);display:flex;align-items:center;gap:clamp(10px,2vw,16px);cursor:pointer;transition:border-color .15s,background .15s;position:relative;overflow:hidden;}
+.room-card::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(74,144,217,.04));opacity:0;transition:opacity .15s;}
+.room-card:hover{border-color:#4a90d9;background:rgba(10,22,42,.95);}
+.room-card:hover::before{opacity:1;}
+.room-ava{width:clamp(42px,6vw,52px);height:clamp(42px,6vw,52px);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(20px,3vw,28px);flex-shrink:0;}
+.ava-wait{background:rgba(46,125,50,.15);border:1.5px solid rgba(46,125,50,.3);}
+.ava-live{background:rgba(21,101,192,.15);border:1.5px solid rgba(21,101,192,.3);}
+.ava-done{background:rgba(121,85,72,.15);border:1.5px solid rgba(121,85,72,.3);}
+.room-body{flex:1;min-width:0;}
+.room-name{font-size:clamp(12px,1.8vw,15px);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.room-meta{font-size:clamp(10px,1.3vw,12px);color:#4a6a8a;display:flex;flex-wrap:wrap;gap:8px;}
+.room-meta .players-pips{display:inline-flex;gap:3px;align-items:center;}
+.pip{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.pip-human{background:#4fc3f7;}
+.pip-ai{background:#2a3a50;}
+.room-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.4px;white-space:nowrap;}
+.badge-wait{background:rgba(46,125,50,.2);color:#66bb6a;border:1px solid rgba(46,125,50,.3);}
+.badge-live{background:rgba(239,83,80,.18);color:#ef9a9a;border:1px solid rgba(239,83,80,.25);}
+.badge-live::before{content:'● ';font-size:7px;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.badge-done{background:rgba(121,85,72,.2);color:#bcaaa4;border:1px solid rgba(121,85,72,.3);}
+.room-code{font-size:11px;color:#2a4060;font-family:monospace;letter-spacing:2px;}
+.owner-tag{font-size:10px;color:#ff8f00;font-weight:700;}
+.empty-rooms{text-align:center;padding:clamp(28px,5vh,48px) 0;color:#2a4060;}
+.empty-rooms .eim{font-size:40px;margin-bottom:10px;}
+/* LEADERBOARD */
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-size:10px;color:#2a4060;text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;border-bottom:1px solid #0e1e34;text-align:left;font-weight:600;}
+.lb-table th:not(:first-child){text-align:center;}
+.lb-table td{padding:clamp(7px,1.2vh,10px) 8px;border-bottom:1px solid rgba(28,47,80,.5);font-size:clamp(11px,1.5vw,13px);}
+.lb-table tr:last-child td{border-bottom:none;}
+.lb-table tr:hover td{background:rgba(74,144,217,.04);}
+.lb-rank{font-weight:800;color:#2a4060;width:28px;}
+.lb-rank.gold{color:#ffd54f;}
+.lb-rank.silver{color:#b0bec5;}
+.lb-rank.bronze{color:#a1887f;}
+.lb-name{font-weight:600;color:#e8eaf6;}
+.lb-pts{color:#ff8f00;font-weight:800;text-align:center;}
+.lb-wins{color:#4fc3f7;font-weight:700;text-align:center;}
+.lb-wr{text-align:center;}
+.wr-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.wr-hi{background:rgba(76,175,80,.18);color:#66bb6a;}
+.wr-mid{background:rgba(255,213,79,.12);color:#ffd54f;}
+.wr-lo{background:rgba(239,83,80,.15);color:#ef9a9a;}
+/* RECENT MATCHES */
+.match-list{display:flex;flex-direction:column;gap:8px;}
+.match-item{background:rgba(7,15,28,.8);border:1px solid #0e1e34;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;}
+.match-icon{font-size:20px;flex-shrink:0;}
+.match-body{flex:1;min-width:0;}
+.match-teams{font-size:clamp(11px,1.5vw,13px);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.match-meta{font-size:10px;color:#2a4060;margin-top:2px;}
+.match-score{font-size:clamp(12px,1.8vw,15px);font-weight:800;color:#ffd54f;flex-shrink:0;font-family:monospace;}
+/* REFRESH */
+.refresh-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.refresh-btn{background:none;border:none;color:#2a5080;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;transition:color .15s;}
+.refresh-btn:hover{color:#8ab4f8;}
+.last-updated{font-size:10px;color:#1a2a40;}
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid #0e1e34;}
+.tab{padding:8px 14px;font-size:clamp(11px,1.5vw,13px);font-weight:600;color:#2a5080;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap;}
+.tab.active{color:#8ab4f8;border-bottom-color:#4a90d9;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+.no-data{text-align:center;padding:clamp(20px,4vh,36px) 0;color:#2a4060;font-size:13px;}
+/* SHIMMER */
+.shimmer{background:linear-gradient(90deg,#0a1828 25%,#0e1e34 50%,#0a1828 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;height:14px;margin:8px 0;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#1c2f50;border-radius:4px;}
+/* MODALS */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:#0a1828;border:2px solid #1c2f50;border-radius:18px;padding:clamp(20px,4vh,32px) clamp(18px,4vw,28px);width:100%;max-width:400px;animation:mpop .18s ease-out;max-height:90vh;overflow-y:auto;}
+@keyframes mpop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h2{font-size:clamp(16px,2.5vw,20px);color:#8ab4f8;font-weight:800;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.modal-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid #0e1e34;}
+.modal-tab{flex:1;padding:10px;font-size:13px;font-weight:700;color:#2a5080;cursor:pointer;border-bottom:2px solid transparent;text-align:center;transition:all .15s;}
+.modal-tab.active{color:#8ab4f8;border-bottom-color:#4a90d9;}
+.modal-pane{display:none;}
+.modal-pane.active{display:block;}
+.modal-btns{display:flex;gap:10px;margin-top:16px;}
+.mbtn-cancel{flex:0 0 auto;padding:10px 16px;border:1.5px solid #1c2f50;border-radius:9px;background:transparent;color:#5a8aaa;font-size:13px;font-weight:600;cursor:pointer;}
+.mbtn-cancel:hover{border-color:#4a90d9;}
+.mbtn-ok{flex:1;padding:10px;border:none;border-radius:9px;background:#1565c0;color:#fff;font-size:14px;font-weight:700;cursor:pointer;}
+.mbtn-ok:hover{background:#1976d2;}
+.m-err{color:#ef5350;font-size:12px;margin-top:8px;min-height:16px;}
+.m-success{color:#66bb6a;font-size:12px;margin-top:8px;}
+/* DASHBOARD */
+.dash-panel{background:rgba(10,20,38,.88);border:1.5px solid #1c2f50;border-radius:16px;padding:clamp(16px,3vh,26px);margin-bottom:14px;}
+.dash-stat-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.dash-stat{background:#070f1c;border:1px solid #0e1e34;border-radius:10px;padding:12px 18px;flex:1;min-width:100px;text-align:center;}
+.dash-stat .dsv{font-size:22px;font-weight:800;color:#ffd54f;}
+.dash-stat .dsl{font-size:10px;color:#4a6a8a;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.dash-room-card{background:#070f1c;border:1px solid #0e1e34;border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.dash-room-info{flex:1;min-width:0;}
+.dash-room-name{font-size:14px;font-weight:700;color:#e8eaf6;}
+.dash-room-meta{font-size:11px;color:#2a4060;margin-top:2px;}
+.dash-room-btns{display:flex;gap:6px;}
+.drbtn{padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;}
+.drbtn-enter{background:#1565c0;color:#fff;}
+.drbtn-settings{background:transparent;border:1px solid #1c2f50;color:#8ab4f8;}
+.rewards-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,143,0,.12);border:1px solid rgba(255,143,0,.3);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;color:#ff8f00;}
+/* Join modal */
+#joinModal .field{margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div class="page">
+
+  <!-- TOP NAV -->
+  <div class="topbar" id="topbar"></div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-suits">♠ ♥ ♦ ♣</div>
+    <div class="hero-title">29 Card Game</div>
+    <div class="hero-sub">Classic South Asian trick-taking · Multiplayer online</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statRow">
+    <div class="stat-pill"><span class="stat-icon">🎮</span><div class="stat-info"><span class="stat-val" id="statMatches">—</span><span class="stat-lbl">Total Matches</span></div></div>
+    <div class="stat-pill"><span class="stat-icon">🟢</span><div class="stat-info"><span class="stat-val" id="statActive">—</span><span class="stat-lbl">Active Players</span></div></div>
+    <div class="stat-pill"><span class="stat-icon">⚡</span><div class="stat-info"><span class="stat-val" id="statRooms">—</span><span class="stat-lbl">Live Rooms</span></div></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: Create / Join -->
+    <div>
+      <div class="panel" style="margin-bottom:clamp(14px,2.5vw,22px)" id="createPanel">
+        <div class="panel-title"><span class="tico">🎮</span> Create Room</div>
+        <div id="createContent"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span class="tico">🔑</span> Join by Code</div>
+        <div class="field">
+          <label>Room Code</label>
+          <input type="text" id="joinCode" placeholder="e.g. ABC123" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-family:monospace;font-size:18px;" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="joinByCode()">Join Room →</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Tabs -->
+    <div class="panel" style="display:flex;flex-direction:column;">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('lb')">🏆 Leaderboard</div>
+        <div class="tab" onclick="switchTab('matches')">📋 Recent Matches</div>
+      </div>
+      <div class="tab-pane active" id="tabLb">
+        <div id="lbContent"><div class="shimmer"></div><div class="shimmer" style="width:80%"></div><div class="shimmer" style="width:65%"></div></div>
+      </div>
+      <div class="tab-pane" id="tabMatches">
+        <div id="matchContent"><div class="shimmer"></div><div class="shimmer" style="width:85%"></div></div>
+      </div>
+    </div>
+
+    <!-- ROOMS (full width) -->
+    <div class="panel rooms-panel">
+      <div class="refresh-row">
+        <div class="panel-title" style="margin-bottom:0"><span class="tico">🌐</span> Public Rooms</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="last-updated" id="lastUpdated"></span>
+          <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+        </div>
+      </div>
+      <div class="room-list" id="roomList"><div class="shimmer"></div><div class="shimmer" style="width:90%"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="authModal">
+  <div class="modal" style="max-width:360px;">
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</div>
+      <div class="modal-tab" id="tabReg" onclick="switchAuthTab('register')">Register</div>
+    </div>
+    <!-- LOGIN -->
+    <div class="modal-pane active" id="paneLogin">
+      <div class="field"><label>Username</label><input type="text" id="loginUser" placeholder="your_username" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Password" autocomplete="current-password"></div>
+      <div class="m-err" id="loginErr"></div>
+      <div class="modal-btns">
+        <button class="mbtn-cancel" onclick="closeAuthModal()">Cancel</button>
+        <button class="mbtn-ok" onclick="doLogin()">Sign In →</button>
+      </div>
+    </div>
+    <!-- REGISTER -->
+    <div class="modal-pane" id="paneReg">
+      <div class="field"><label>Username</label><input type="text" id="regUser" placeholder="letters_numbers_only" maxlength="20" autocomplete="username"></div>
+      <div class="field"><label>Display Name</label><input type="text" id="regDisplay" placeholder="How others see you" maxlength="30" autocomplete="name"></div>
+      <div class="field"><label>Password</label><input type="password" id="regPass" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <div class="m-err" id="regErr"></div>
+      <div class="modal-btns">
+        <button class="mbtn-cancel" onclick="closeAuthModal()">Cancel</button>
+        <button class="mbtn-ok" onclick="doRegister()">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN MODAL -->
+<div class="modal-bg" id="joinModal">
+  <div class="modal" style="max-width:360px;">
+    <h2>🔑 <span id="modalTitle">Join Room</span></h2>
+    <div class="field" id="modalNameWrap">
+      <label>Your Name</label>
+      <input type="text" id="modalName" placeholder="Enter your name" maxlength="20" autocomplete="off">
+    </div>
+    <div id="modalPassWrap" style="display:none">
+      <div class="field"><label>Room Password</label><input type="password" id="modalPass" placeholder="Enter password"></div>
+    </div>
+    <div id="modalCostHint" style="display:none;background:rgba(255,143,0,.1);border:1px solid rgba(255,143,0,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:#ff8f00;margin-bottom:10px;"></div>
+    <div class="m-err" id="modalErr"></div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="mbtn-ok" onclick="confirmJoin()">Join →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD MODAL -->
+<div class="modal-bg" id="dashModal">
+  <div class="modal" style="max-width:540px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <h2 style="margin-bottom:0">📊 My Dashboard</h2>
+      <button class="mbtn-cancel" onclick="closeDash()">✕</button>
+    </div>
+    <div id="dashContent"><div class="shimmer"></div><div class="shimmer" style="width:80%"></div></div>
+  </div>
+</div>
+
+<!-- TRANSFER MODAL -->
+<div class="modal-bg" id="transferModal">
+  <div class="modal" style="max-width:360px;">
+    <h2>↔ Transfer Chips</h2>
+    <p style="font-size:12px;color:#4a6a8a;margin-bottom:16px;">Send chips to another registered user.</p>
+    <div class="field"><label>Recipient Username</label><input type="text" id="txTo" placeholder="their_username" autocomplete="off"></div>
+    <div class="field"><label>Amount</label><input type="number" id="txAmount" placeholder="1–1000" min="1" max="1000"></div>
+    <div style="font-size:12px;color:#4a6a8a;margin-bottom:8px;">Your balance: <span id="txBalance" style="color:#ffd54f;font-weight:700">—</span> chips</div>
+    <div class="m-err" id="txErr"></div>
+    <div class="m-success" id="txOk"></div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="document.getElementById('transferModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn-ok" onclick="doTransfer()">Send Chips →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openTransfer(){
+  document.getElementById('txErr').textContent='';
+  document.getElementById('txOk').textContent='';
+  document.getElementById('txTo').value='';
+  document.getElementById('txAmount').value='';
+  document.getElementById('txBalance').textContent=currentUser?.chips??'?';
+  document.getElementById('transferModal').classList.add('open');
+  setTimeout(()=>document.getElementById('txTo').focus(),80);
+}
+
+async function doTransfer(){
+  const to=(document.getElementById('txTo').value||'').trim().toLowerCase();
+  const amount=parseInt(document.getElementById('txAmount').value)||0;
+  const errEl=document.getElementById('txErr');
+  const okEl=document.getElementById('txOk');
+  errEl.textContent='';okEl.textContent='';
+  if(!to||amount<1){errEl.textContent='Fill in all fields.';return;}
+  try{
+    const r=await fetch('/api/chips/transfer',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({to,amount,token:authToken})});
+    const d=await r.json();
+    if(d.ok){
+      okEl.textContent=d.message;
+      currentUser.chips=d.yourChips;
+      document.getElementById('txBalance').textContent=d.yourChips;
+      renderTopbar();
+    } else errEl.textContent=d.error||'Transfer failed.';
+  }catch(e){errEl.textContent='Network error.';}
+}
+</script>
+<div class="modal-bg" id="settingsModal">
+  <div class="modal" style="max-width:380px;">
+    <h2>⚙️ Room Settings</h2>
+    <div id="settingsContent"></div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="document.getElementById('settingsModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn-ok" onclick="saveRoomSettings()">Save →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── IDENTITY ─────────────────────────────────────────────
+const MY_CLIENT_ID = (()=>{let id=sessionStorage.getItem('29_cid')||localStorage.getItem('29_cid');if(!id){id='c_'+Math.random().toString(36).slice(2,12);}sessionStorage.setItem('29_cid',id);localStorage.setItem('29_cid',id);return id;})();
+
+// ── SESSION ───────────────────────────────────────────────
+let currentUser = null;
+let guestInfo   = null;
+let authToken   = localStorage.getItem('29_token')||null;
+
+// Hide page until auth resolves to prevent flash of lobby for unauthenticated users
+document.documentElement.style.visibility = 'hidden';
+
+async function loadMe() {
+  if (authToken) {
+    try {
+      const r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+authToken}});
+      if (r.ok) { const d=await r.json(); currentUser=d.user; }
+      else { authToken=null; localStorage.removeItem('29_token'); }
+    } catch(e) {}
+  }
+  if (!currentUser && localStorage.getItem('29_gname')) {
+    try {
+      const r = await fetch(`/api/guest/me?clientId=${MY_CLIENT_ID}`);
+      if (r.ok) { const d=await r.json(); guestInfo=d; }
+      else { localStorage.removeItem('29_gname'); }
+    } catch(e) {}
+  }
+  // If neither auth nor guest, redirect to landing
+  if (!currentUser && !guestInfo) { window.location.href='/'; return; }
+  document.documentElement.style.visibility = 'visible';
+  renderTopbar();
+  renderCreatePanel();
+}
+
+function renderTopbar() {
+  const tb = document.getElementById('topbar');
+  if (currentUser) {
+    tb.innerHTML = `
+      <div class="user-pill">
+        <div class="avatar">${currentUser.displayName[0].toUpperCase()}</div>
+        <div>
+          <div class="uname">${esc(currentUser.displayName)}</div>
+          <div class="pts">🪙 ${currentUser.chips} chips</div>
+        </div>
+      </div>
+      <button class="btn-dashboard" onclick="openTransfer()">↔ Transfer</button>
+      <button class="btn-dashboard" onclick="openDash()">📊 Dashboard</button>
+      <button class="btn-nav btn-logout" onclick="doLogout()">Sign Out</button>`;
+  } else if (guestInfo) {
+    tb.innerHTML = `
+      <div class="user-pill" style="border-color:rgba(138,180,248,.2)">
+        <div class="avatar" style="background:linear-gradient(135deg,#1565c0,#0d47a1)">🎭</div>
+        <div>
+          <div class="uname">${esc(guestInfo.name)} <span style="font-size:10px;color:#4a6a8a">(Guest)</span></div>
+          <div class="pts">🪙 ${guestInfo.chips} chips</div>
+        </div>
+      </div>
+      <button class="btn-nav btn-register" onclick="window.location.href='/?register=1'">Register Free</button>`;
+  }
+}
+
+function renderCreatePanel() {
+  const el = document.getElementById('createContent');
+  if (!currentUser) {
+    el.innerHTML = `
+      <div class="login-wall">
+        <div style="font-size:32px;margin-bottom:8px;">🔒</div>
+        <p>Only registered users can create rooms. <a href="/" style="color:#8ab4f8;">Sign in or register</a> to get started.</p>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="field">
+      <label>Room Name</label>
+      <input type="text" id="roomName" placeholder="e.g. Friday Night Game" maxlength="30" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Password <span style="color:#1a3050;font-weight:400">(optional)</span></label>
+      <input type="password" id="roomPass" placeholder="Leave blank for public">
+      <div class="hint-txt">🔒 Password rooms won't appear in the public list</div>
+    </div>
+
+    <!-- THEME CUSTOMIZER -->
+    <div class="collapsible-header" onclick="toggleCollapse(this)" id="themeHeader">
+      <span>🎨 Room Theme (optional)</span>
+      <span class="chev">▾</span>
+    </div>
+    <div class="collapsible-body" id="themeBody">
+      <div style="padding:12px 0 4px;">
+        <div class="theme-row">
+          <div>
+            <div class="field" style="margin-bottom:6px;"><label>Background Color</label></div>
+            <div class="color-field"><input type="color" id="thBg" value="#06080d"><span>Table BG</span></div>
+          </div>
+          <div>
+            <div class="field" style="margin-bottom:6px;"><label>Table Color</label></div>
+            <div class="color-field"><input type="color" id="thTable" value="#0a1828"><span>Felt</span></div>
+          </div>
+        </div>
+        <div class="theme-row">
+          <div>
+            <div class="field" style="margin-bottom:6px;"><label>Border Color</label></div>
+            <div class="color-field"><input type="color" id="thBorder" value="#1c2f50"><span>Edges</span></div>
+          </div>
+          <div>
+            <div class="field" style="margin-bottom:6px;"><label>Accent Color</label></div>
+            <div class="color-field"><input type="color" id="thAccent" value="#ffd54f"><span>Highlights</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Background Image</label>
+          <label class="img-upload-btn" for="thImgInput">📷 Upload image (max 500KB)</label>
+          <input type="file" id="thImgInput" accept="image/*" style="display:none" onchange="handleImgUpload(this)">
+          <img id="thImgPreview" class="img-preview" alt="preview">
+          <div class="hint-txt" id="thImgHint">JPG/PNG — will be shown as room background</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYING CONDITIONS -->
+    <div class="collapsible-header" onclick="toggleCollapse(this)" id="condHeader" style="margin-top:8px;">
+      <span>🛡️ Playing Conditions</span>
+      <span class="chev">▾</span>
+    </div>
+    <div class="collapsible-body" id="condBody">
+      <div style="padding:12px 0 4px;">
+        <div class="conditions-row">
+          <div><div class="cond-label">Allow Guest Players</div><div class="cond-sub">Non-logged-in users can sit</div></div>
+          <div class="toggle on" id="toggleGuests" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="conditions-row" style="margin-top:10px;">
+          <div><div class="cond-label">Spectator Mode</div><div class="cond-sub">Nobody can sit — watch only</div></div>
+          <div class="toggle" id="toggleSpectator" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="conditions-row" style="margin-top:10px;align-items:flex-start;flex-direction:column;gap:6px;">
+          <div><div class="cond-label">Room Entry Cost (chips)</div><div class="cond-sub">Visitors pay chips to enter the room</div></div>
+          <input type="number" id="condEntryCost" placeholder="0" min="0" max="50" style="width:100%;padding:8px 12px;background:#070f1c;border:1.5px solid #1c2f50;border-radius:8px;color:#e8eaf6;font-size:14px;outline:none;" value="0">
+        </div>
+        <div class="conditions-row" style="margin-top:10px;align-items:flex-start;flex-direction:column;gap:6px;">
+          <div><div class="cond-label">Min. Chips to Sit</div><div class="cond-sub">Players must have this many chips to sit (0 = no limit)</div></div>
+          <input type="number" id="condMinChips" placeholder="0" min="0" style="width:100%;padding:8px 12px;background:#070f1c;border:1.5px solid #1c2f50;border-radius:8px;color:#e8eaf6;font-size:14px;outline:none;" value="0">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btnCreate" onclick="createRoom()">Create &amp; Enter Room →</button>`;
+}
+
+// ── COLLAPSIBLE ───────────────────────────────────────────
+function toggleCollapse(header) {
+  const id = header.id.replace('Header','Body');
+  const body = document.getElementById(id);
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ── IMAGE UPLOAD ──────────────────────────────────────────
+let bgImageB64 = null;
+function handleImgUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  if (file.size > 500*1024) { document.getElementById('thImgHint').textContent = '⚠️ Image too large (max 500KB)'; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    bgImageB64 = e.target.result;
+    const prev = document.getElementById('thImgPreview');
+    prev.src = bgImageB64; prev.style.display='block';
+    document.getElementById('thImgHint').textContent = '✅ Image loaded';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── PARTICLES ─────────────────────────────────────────────
+(function(){const suits=['♠','♥','♦','♣'];const bg=document.getElementById('bg');for(let i=0;i<18;i++){const el=document.createElement('span');el.className='suit-particle';el.textContent=suits[i%4];el.style.cssText=`left:${Math.random()*100}%;color:${i%4<2?'#e8eaf6':'#e53935'};animation-duration:${12+Math.random()*18}s;animation-delay:${-Math.random()*20}s;font-size:${16+Math.random()*24}px;`;bg.appendChild(el);}})();
+
+// ── TABS ──────────────────────────────────────────────────
+function switchTab(id){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['lb','matches'][i]===id));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.getElementById('tab'+(id==='lb'?'Lb':'Matches')).classList.add('active');}
+
+// ── DATA LOADING ──────────────────────────────────────────
+let pendingRoomId=null,pendingNeedsPass=false;
+
+async function loadAll(){
+  document.getElementById('lastUpdated').textContent='Updating…';
+  await Promise.all([loadRooms(),loadStats()]);
+  document.getElementById('lastUpdated').textContent='Updated '+new Date().toLocaleTimeString();
+}
+async function loadRooms(){
+  try{const r=await fetch('/api/lobby');const rooms=await r.json();
+    renderRooms(rooms.filter(r=>!r.passwordProtected || (currentUser && r.ownerUsername===currentUser.username)));
+  }
+  catch(e){document.getElementById('roomList').innerHTML='<div class="no-data">Could not load rooms</div>';}
+}
+async function loadStats(){
+  try{const r=await fetch('/api/stats');const d=await r.json();
+    document.getElementById('statMatches').textContent=d.totalMatches??'0';
+    document.getElementById('statActive').textContent=d.activeUsers??'0';
+    document.getElementById('statRooms').textContent=d.activeRooms??'0';
+    renderLeaderboard(d.topPlayers||[]);renderRecentMatches(d.recentMatches||[]);
+  }catch(e){}
+}
+
+function renderRooms(rooms){
+  const el=document.getElementById('roomList');
+  if(!rooms.length){el.innerHTML=`<div class="empty-rooms"><div class="eim">🃏</div><p>No public rooms yet.<br>Create one and invite friends!</p></div>`;return;}
+  el.innerHTML=rooms.map(room=>{
+    const isWaiting=room.phase==='waiting';
+    const isLive=['bidding','trump','playing'].includes(room.phase);
+    const isDone=room.phase==='matchOver';
+    const avaClass=isWaiting?'ava-wait':isLive?'ava-live':'ava-done';
+    const icon=isWaiting?'⏳':isLive?'🎮':isDone?'🏆':'🃏';
+    const badge=isWaiting?'<span class="badge badge-wait">WAITING</span>':isLive?'<span class="badge badge-live">LIVE</span>':'<span class="badge badge-done">FINISHED</span>';
+    const pips=Array(4).fill(0).map((_,i)=>{const name=room.playerDetails?.[i];return `<span class="pip ${name?'pip-human':'pip-ai'}" ${name?`title="${esc(name)}"`:''}>`;}).join('');
+    const ownerTag=room.ownerUsername?`<span class="owner-tag">👤 ${esc(room.ownerUsername)}</span>`:'';
+    const entryCostBadge=room.entryCost>0?`<span style="font-size:10px;color:#ff8f00;font-weight:700">🪙 ${room.entryCost} entry</span>`:'';
+    const borderStyle=room.theme?.borderColor?`border-color:${room.theme.borderColor};`:'';
+    return `<div class="room-card" style="${borderStyle}" onclick="openJoinModal('${room.id}',false,${room.entryCost||0})">
+      <div class="room-ava ${avaClass}">${icon}</div>
+      <div class="room-body">
+        <div class="room-name">${esc(room.name)}</div>
+        <div class="room-meta">
+          <span class="players-pips">${pips} ${room.players}/4</span>
+          <span>Hand #${room.handNumber}</span>
+          ${ownerTag}
+          ${entryCostBadge}
+        </div>
+      </div>
+      <div class="room-right">${badge}<span class="room-code">${room.id}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(players){
+  const el=document.getElementById('lbContent');
+  if(!players.length){el.innerHTML='<div class="no-data">No matches played yet</div>';return;}
+  const rankClass=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  const rankIcon=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+  el.innerHTML=`<table class="lb-table">
+    <thead><tr><th></th><th style="text-align:left">Player</th><th>W</th><th>🪙Chips</th><th>Win%</th></tr></thead>
+    <tbody>${players.map((p,i)=>{const wr=p.wins+p.losses>0?Math.round(p.wins/(p.wins+p.losses)*100):0;const wrClass=wr>=60?'wr-hi':wr>=40?'wr-mid':'wr-lo';return `<tr>
+      <td class="lb-rank ${rankClass(i)}">${rankIcon(i)}</td>
+      <td class="lb-name">${esc(p.name||p.username)}</td>
+      <td class="lb-wins">${p.wins}</td>
+      <td class="lb-pts">${p.chips||0}</td>
+      <td class="lb-wr"><span class="wr-pill ${wrClass}">${wr}%</span></td>
+    </tr>`}).join('')}</tbody>
+  </table>`;
+}
+
+function renderRecentMatches(matches){
+  const el=document.getElementById('matchContent');
+  if(!matches.length){el.innerHTML='<div class="no-data">No matches completed yet</div>';return;}
+  el.innerHTML=`<div class="match-list">${matches.map(m=>{
+    const winTeam=m.winner===1?'S+N':'W+E';const loseTeam=m.winner===1?'W+E':'S+N';
+    const winScore=m.winner===1?m.team1Score:m.team2Score;const loseScore=m.winner===1?m.team2Score:m.team1Score;
+    const players=m.players?.map(p=>p.name).join(', ')||'—';
+    return `<div class="match-item"><span class="match-icon">🏆</span>
+      <div class="match-body">
+        <div class="match-teams">${winTeam} beat ${loseTeam} · ${esc(m.roomName||'Room')}</div>
+        <div class="match-meta">${players} · ${m.handNumber} hands · ${timeAgo(m.finishedAt)}</div>
+      </div>
+      <div class="match-score">${winScore} – ${loseScore}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return 'Just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return Math.floor(d/86400000)+'d ago';}
+
+// ── CREATE ROOM ───────────────────────────────────────────
+async function createRoom(){
+  if(!currentUser){window.location.href='/';return;}
+  const roomName=(document.getElementById('roomName').value||'').trim()||'Game Room';
+  const password=(document.getElementById('roomPass').value||'').trim();
+  const btn=document.getElementById('btnCreate');
+  btn.disabled=true;btn.textContent='Creating…';
+
+  // Gather theme
+  const theme={
+    bgColor:document.getElementById('thBg').value,
+    tableColor:document.getElementById('thTable').value,
+    borderColor:document.getElementById('thBorder').value,
+    accentColor:document.getElementById('thAccent').value,
+    bgImage:bgImageB64||null,
+  };
+
+  // Gather conditions
+  const conditions={
+    allowGuests:document.getElementById('toggleGuests').classList.contains('on'),
+    spectatorMode:document.getElementById('toggleSpectator').classList.contains('on'),
+    entryCost:parseInt(document.getElementById('condEntryCost').value)||0,
+    minChips:parseInt(document.getElementById('condMinChips').value)||0,
+  };
+
+  try{
+    const r=await fetch('/api/room/create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({roomName,password,clientId:MY_CLIENT_ID,hostName:currentUser.displayName,token:authToken,theme,conditions})});
+    const d=await r.json();
+    if(d.roomId){window.location.href=`/game?room=${d.roomId}`;}
+    else{alert(d.error||'Could not create room.');}
+  }finally{btn.disabled=false;btn.textContent='Create & Enter Room →';}
+}
+
+// ── JOIN ──────────────────────────────────────────────────
+async function joinByCode(){
+  const code=(document.getElementById('joinCode').value||'').trim().toUpperCase();
+  if(!code){document.getElementById('joinCode').focus();return;}
+  try{const r=await fetch('/api/lobby');const rooms=await r.json();const found=rooms.find(r=>r.id===code);openJoinModal(code,found?!!found.passwordProtected:true);}
+  catch(e){openJoinModal(code,false);}
+}
+
+function openJoinModal(roomId,askPass,entryCost){
+  pendingRoomId=roomId;pendingNeedsPass=askPass;
+  document.getElementById('modalTitle').textContent=`Join Room ${roomId}`;
+  document.getElementById('modalPassWrap').style.display=askPass?'block':'none';
+  document.getElementById('modalPass').value='';
+  document.getElementById('modalErr').textContent='';
+  // Entry cost hint
+  const costHint=document.getElementById('modalCostHint');
+  if(costHint){costHint.style.display=entryCost>0?'block':'none';if(entryCost>0)costHint.textContent=`⚠️ This room costs 🪙 ${entryCost} chips to enter.`;}
+  const nameInput=document.getElementById('modalName');
+  if(currentUser){nameInput.value=currentUser.displayName;nameInput.disabled=true;}
+  else if(guestInfo){nameInput.value=guestInfo.name;nameInput.disabled=true;}
+  else{nameInput.value='';nameInput.disabled=false;}
+  document.getElementById('joinModal').classList.add('open');
+  setTimeout(()=>document.getElementById(askPass?'modalPass':'modalName').focus(),80);
+}
+function closeModal(){document.getElementById('joinModal').classList.remove('open');}
+
+async function confirmJoin(){
+  const nameEl=document.getElementById('modalName');
+  const name=currentUser?currentUser.displayName:guestInfo?guestInfo.name:(nameEl.value||'').trim();
+  const pass=(document.getElementById('modalPass').value||'').trim();
+  const errEl=document.getElementById('modalErr');
+  if(!name){errEl.textContent='Enter your name.';nameEl.focus();return;}
+  errEl.textContent='';
+  try{
+    const r=await fetch('/api/room/join',{method:'POST',headers:{'Content-Type':'application/json','Authorization':authToken?'Bearer '+authToken:''},
+      body:JSON.stringify({roomId:pendingRoomId,password:pass,clientId:MY_CLIENT_ID,guestName:name,token:authToken||undefined})});
+    const d=await r.json();
+    if(r.ok&&d.ok){
+      // Refresh chips display after possible entry cost
+      if(d.entryCostPaid>0){if(currentUser)currentUser.chips-=d.entryCostPaid;else if(guestInfo)guestInfo.chips-=d.entryCostPaid;renderTopbar();}
+      window.location.href=`/game?room=${d.roomId}`;
+    } else errEl.textContent=d.error||'Could not join room.';
+  }catch(e){errEl.textContent='Network error. Try again.';}
+}
+
+// ── AUTH MODAL ────────────────────────────────────────────
+function openAuthModal(tab){
+  document.getElementById('authModal').classList.add('open');
+  switchAuthTab(tab||'login');
+  document.getElementById('loginErr').textContent='';
+  document.getElementById('regErr').textContent='';
+}
+function closeAuthModal(){document.getElementById('authModal').classList.remove('open');}
+function switchAuthTab(t){
+  document.getElementById('paneLogin').classList.toggle('active',t==='login');
+  document.getElementById('paneReg').classList.toggle('active',t==='register');
+  document.getElementById('tabLogin').classList.toggle('active',t==='login');
+  document.getElementById('tabReg').classList.toggle('active',t==='register');
+  setTimeout(()=>document.getElementById(t==='login'?'loginUser':'regUser').focus(),80);
+}
+
+async function doLogin(){
+  const username=document.getElementById('loginUser').value.trim().toLowerCase();
+  const password=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginErr');
+  if(!username||!password){errEl.textContent='Fill in all fields.';return;}
+  errEl.textContent='Signing in…';
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+    const d=await r.json();
+    if(d.ok){authToken=d.token;localStorage.setItem('29_token',authToken);currentUser=d.user;closeAuthModal();renderTopbar();renderCreatePanel();}
+    else errEl.textContent=d.error||'Login failed.';
+  }catch(e){errEl.textContent='Network error.';}
+}
+
+async function doRegister(){
+  const username=document.getElementById('regUser').value.trim().toLowerCase();
+  const displayName=document.getElementById('regDisplay').value.trim();
+  const password=document.getElementById('regPass').value;
+  const errEl=document.getElementById('regErr');
+  if(!username||!password){errEl.textContent='Fill in all fields.';return;}
+  errEl.textContent='Creating account…';
+  try{
+    const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,displayName,password})});
+    const d=await r.json();
+    if(d.ok){authToken=d.token;localStorage.setItem('29_token',authToken);currentUser=d.user;closeAuthModal();renderTopbar();renderCreatePanel();}
+    else errEl.textContent=d.error||'Registration failed.';
+  }catch(e){errEl.textContent='Network error.';}
+}
+
+async function doLogout(){
+  try{await fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+authToken}});}catch(e){}
+  authToken=null;currentUser=null;guestInfo=null;
+  localStorage.removeItem('29_token');localStorage.removeItem('29_gname');
+  window.location.href='/';
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────
+let settingsRoomId=null;
+
+async function openDash(){
+  document.getElementById('dashModal').classList.add('open');
+  document.getElementById('dashContent').innerHTML='<div class="shimmer"></div><div class="shimmer" style="width:80%"></div>';
+  try{
+    const r=await fetch('/api/dashboard',{headers:{'Authorization':'Bearer '+authToken}});
+    const d=await r.json();
+    renderDash(d);
+  }catch(e){document.getElementById('dashContent').innerHTML='<div class="no-data">Could not load dashboard</div>';}
+}
+function closeDash(){document.getElementById('dashModal').classList.remove('open');}
+
+function renderDash(d){
+  const u=d.user;
+  const wr=u.wins+u.losses>0?Math.round(u.wins/(u.wins+u.losses)*100):0;
+  let html=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffd54f,#ff8f00);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#1a0e00;">${u.displayName[0].toUpperCase()}</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:#e8eaf6;">${esc(u.displayName)}</div>
+        <div style="font-size:12px;color:#4a6a8a;">@${esc(u.username)} · Member since ${new Date(u.createdAt).toLocaleDateString()}</div>
+      </div>
+      <div class="rewards-badge" style="margin-left:auto;">🪙 ${u.chips} chips</div>
+    </div>
+    <div class="dash-stat-row">
+      <div class="dash-stat"><div class="dsv">${u.wins}</div><div class="dsl">Wins</div></div>
+      <div class="dash-stat"><div class="dsv">${u.losses}</div><div class="dsl">Losses</div></div>
+      <div class="dash-stat"><div class="dsv">${wr}%</div><div class="dsl">Win Rate</div></div>
+      <div class="dash-stat"><div class="dsv">${u.handsPlayed}</div><div class="dsl">Hands</div></div>
+      <div class="dash-stat"><div class="dsv">${u.roomsCreated}</div><div class="dsl">Rooms Created</div></div>
+    </div>`;
+
+  if(d.rooms.length){
+    html+=`<div style="font-size:13px;font-weight:700;color:#8ab4f8;margin-bottom:10px;">🎮 My Rooms</div>`;
+    html+=d.rooms.map(room=>`
+      <div class="dash-room-card">
+        <div class="dash-room-info">
+          <div class="dash-room-name">${esc(room.name)}</div>
+          <div class="dash-room-meta">Phase: ${room.phase} · Hand #${room.handNumber} · Score S+N ${room.team1Score} | W+E ${room.team2Score} · ${room.players} players</div>
+        </div>
+        <div class="dash-room-btns">
+          <button class="drbtn drbtn-enter" onclick="window.location.href='/game?room=${room.id}'">Enter</button>
+          <button class="drbtn drbtn-settings" onclick="openRoomSettings('${room.id}',${JSON.stringify(room.conditions).replace(/"/g,'&quot;')})">Settings</button>
+        </div>
+      </div>`).join('');
+  }
+
+  if(d.recentMatches.length){
+    html+=`<div style="font-size:13px;font-weight:700;color:#8ab4f8;margin:14px 0 10px;">📋 Recent Matches</div>`;
+    html+=`<div class="match-list">${d.recentMatches.map(m=>{
+      const winTeam=m.winner===1?'S+N':'W+E';const loseTeam=m.winner===1?'W+E':'S+N';
+      const winScore=m.winner===1?m.team1Score:m.team2Score;const loseScore=m.winner===1?m.team2Score:m.team1Score;
+      return `<div class="match-item"><span class="match-icon">🏆</span>
+        <div class="match-body">
+          <div class="match-teams">${winTeam} beat ${loseTeam} · ${esc(m.roomName||'Room')}</div>
+          <div class="match-meta">${m.players?.map(p=>p.name).join(', ')||'—'} · ${timeAgo(m.finishedAt)}</div>
+        </div>
+        <div class="match-score">${winScore}–${loseScore}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  if(d.transfers && d.transfers.length){
+    html+=`<div style="font-size:13px;font-weight:700;color:#8ab4f8;margin:14px 0 10px;">↔ Recent Transfers</div>`;
+    html+=`<div class="match-list">${d.transfers.map(t=>{
+      const isSender=t.from===d.user.username;
+      return `<div class="match-item">
+        <span class="match-icon">${isSender?'📤':'📥'}</span>
+        <div class="match-body">
+          <div class="match-teams">${isSender?`Sent to @${esc(t.to)}`:`Received from @${esc(t.from)}`}</div>
+          <div class="match-meta">${timeAgo(t.at)}</div>
+        </div>
+        <div class="match-score" style="color:${isSender?'#ef9a9a':'#66bb6a'}">${isSender?'-':'+'} ${t.amount}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  document.getElementById('dashContent').innerHTML=html;
+}
+
+function openRoomSettings(roomId,conditions){
+  settingsRoomId=roomId;
+  document.getElementById('settingsContent').innerHTML=`
+    <div class="conditions-row">
+      <div><div class="cond-label">Allow Guest Players</div><div class="cond-sub">Non-logged-in users can sit</div></div>
+      <div class="toggle ${conditions.allowGuests!==false?'on':''}" id="sToggleGuests" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="conditions-row" style="margin-top:10px;">
+      <div><div class="cond-label">Spectator Mode</div><div class="cond-sub">Nobody can sit — watch only</div></div>
+      <div class="toggle ${conditions.spectatorMode?'on':''}" id="sToggleSpectator" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="conditions-row" style="margin-top:10px;align-items:flex-start;flex-direction:column;gap:6px;">
+      <div><div class="cond-label">Room Entry Cost (chips)</div><div class="cond-sub">Visitors pay to enter</div></div>
+      <input type="number" id="sCondEntry" value="${conditions.entryCost||0}" min="0" max="50" style="width:100%;padding:8px 12px;background:#070f1c;border:1.5px solid #1c2f50;border-radius:8px;color:#e8eaf6;font-size:14px;outline:none;">
+    </div>
+    <div class="conditions-row" style="margin-top:10px;align-items:flex-start;flex-direction:column;gap:6px;">
+      <div><div class="cond-label">Min. Chips to Sit</div><div class="cond-sub">0 = no restriction</div></div>
+      <input type="number" id="sCondMinChips" value="${conditions.minChips||0}" min="0" style="width:100%;padding:8px 12px;background:#070f1c;border:1.5px solid #1c2f50;border-radius:8px;color:#e8eaf6;font-size:14px;outline:none;">
+    </div>`;
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+async function saveRoomSettings(){
+  if(!settingsRoomId) return;
+  const allowGuests=document.getElementById('sToggleGuests').classList.contains('on');
+  const spectatorMode=document.getElementById('sToggleSpectator').classList.contains('on');
+  const entryCost=parseInt(document.getElementById('sCondEntry').value)||0;
+  const minChips=parseInt(document.getElementById('sCondMinChips').value)||0;
+  try{
+    const r=await fetch('/api/room/conditions',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({roomId:settingsRoomId,allowGuests,spectatorMode,entryCost,minChips})});
+    const d=await r.json();
+    if(d.ok){document.getElementById('settingsModal').classList.remove('open');openDash();}
+    else alert(d.error||'Failed to save settings.');
+  }catch(e){alert('Network error.');}
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(document.getElementById('joinModal').classList.contains('open')) confirmJoin();
+    else if(document.getElementById('transferModal').classList.contains('open')) doTransfer();
+  }
+  if(e.key==='Escape'){
+    closeModal();closeDash();
+    document.getElementById('settingsModal').classList.remove('open');
+    document.getElementById('transferModal').classList.remove('open');
+  }
+});
+
+// ── INIT ──────────────────────────────────────────────────
+loadMe().then(()=>loadAll());
+setInterval(loadAll,8000);
+</script>
+<script>if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW:',e));});}</script>
+</body>
+</html>

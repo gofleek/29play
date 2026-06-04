@@ -1,0 +1,15 @@
+{
+  "fleek": {
+    "username": "fleek",
+    "displayName": "fleek",
+    "passwordHash": "bae580e3274199427813396ee02f4e0b0a031c5ad96da46c25218750546862e3",
+    "salt": "c85bec09b91f54645f15d5b68c2fc73c",
+    "createdAt": 1780615346902,
+    "chips": 96,
+    "wins": 0,
+    "losses": 0,
+    "handsPlayed": 0,
+    "roomsCreated": 2,
+    "transfers": []
+  }
+}
