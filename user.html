@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <!-- PWA -->
@@ -16,28 +16,31 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:-apple-system,'Segoe UI',Arial,sans-serif;}
 html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidden;touch-action:manipulation;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
-/* iOS Safari full-height fix — 100dvh not supported on older iOS; use min-height fallback */
+
 @media(max-width:680px){
   html,body{
     height:100vh;
+    height:100dvh;
     height:-webkit-fill-available;
     min-height:-webkit-fill-available;
   }
 }
 
-/* ROTATE NUDGE */
+/* ROTATE NUDGE — only on small portrait phones */
 #rotateNudge{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:#06080d;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;gap:18px;}
 #rotateNudge .ri{font-size:56px;-webkit-animation:rspin 2s ease-in-out infinite;animation:rspin 2s ease-in-out infinite;}
 @-webkit-keyframes rspin{0%,100%{-webkit-transform:rotate(0);transform:rotate(0)}50%{-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}}
 @keyframes rspin{0%,100%{transform:rotate(0)}50%{transform:rotate(-90deg)}}
 #rotateNudge p{font-size:15px;color:#8ab4f8;text-align:center;padding:0 28px;}
-@media(max-width:767px) and (orientation:portrait){#rotateNudge{display:flex;}}
+/* Only nudge on small portrait phones (≤500px wide) */
+@media(max-width:500px) and (orientation:portrait){#rotateNudge{display:flex;}}
 
 /* GAME SCREEN */
 #gameScreen{position:absolute;top:0;right:0;bottom:0;left:0;background:-webkit-radial-gradient(center 44%,circle,#0d2218 0%,#05070a 85%);background:radial-gradient(circle at 50% 44%,#0d2218 0%,#05070a 85%);overflow:hidden;}
 @media(max-width:680px){
   #gameScreen{
     height:100vh;
+    height:100dvh;
     height:-webkit-fill-available;
   }
 }
@@ -52,7 +55,7 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .btn-icon-tb:hover{background:#243a58;}
 .btn-icon-tb.active{background:#1e3a20;border-color:#3a6a30;color:#6fcf6f;}
 
-/* ── SCOREBOARD — desktop: left panel, mobile: top strip ── */
+/* ── SCOREBOARD ── */
 #scorePanel{
   position:absolute;
   top:calc(clamp(38px,6vh,48px) + 6px);
@@ -66,7 +69,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
   pointer-events:none;
   display:none;
 }
-/* Mobile: scoreboard becomes a compact VERTICAL strip on the LEFT */
 @media(max-width:680px){
   #scorePanel{
     top:calc(clamp(38px,6vh,48px));
@@ -94,18 +96,10 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .sp-title{font-size:11px;color:#4a6a8a;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;font-weight:700;}
 @media(max-width:680px){.sp-title{display:none;}}
 
-/* Score rows */
 .sp-row{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-start;justify-content:flex-start;gap:4px;margin-bottom:5px;}
 @media(max-width:680px){
-  .sp-row{
-    -webkit-flex-direction:row;flex-direction:row;
-    -webkit-align-items:center;align-items:center;
-    -webkit-justify-content:flex-start;justify-content:flex-start;
-    gap:3px;margin-bottom:3px;
-    border-right:none;padding:0;
-  }
+  .sp-row{-webkit-flex-direction:row;flex-direction:row;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-start;justify-content:flex-start;gap:3px;margin-bottom:3px;border-right:none;padding:0;}
 }
-/* BOLDER SCOREBOARD TEAM + POINTS */
 .sp-team{font-size:clamp(11px,1.4vw,14px);color:#8ab4f8;font-weight:800;letter-spacing:.3px;}
 @media(max-width:680px){.sp-team{font-size:11px;}}
 .sp-pts{font-size:clamp(20px,2.8vw,28px);font-weight:900;min-width:unset;text-align:left;line-height:1;}
@@ -114,30 +108,18 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .sp-divider{height:1px;background:#182336;margin:7px 0;}
 @media(max-width:680px){.sp-divider{height:1px;background:#182336;margin:3px 0;display:block;}}
 
-/* Bid / hand pts rows */
 .sp-row2{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-start;justify-content:flex-start;gap:4px;margin-top:3px;}
 @media(max-width:680px){
-  .sp-row2{
-    -webkit-flex-direction:row;flex-direction:row;
-    -webkit-align-items:center;align-items:center;
-    -webkit-justify-content:flex-start;justify-content:flex-start;
-    gap:3px;margin-top:2px;
-    border-right:none;padding:0;
-  }
+  .sp-row2{-webkit-flex-direction:row;flex-direction:row;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-start;justify-content:flex-start;gap:3px;margin-top:2px;border-right:none;padding:0;}
 }
 .sp-lbl{font-size:clamp(9px,1.1vw,11px);color:#5a7a9a;font-weight:600;}
 @media(max-width:680px){.sp-lbl{font-size:9px;}}
 .sp-val{font-size:clamp(12px,1.6vw,15px);color:#ffd54f;font-weight:800;}
 @media(max-width:680px){.sp-val{font-size:11px;}}
 
-/* Trump inside score panel */
 #trumpBadge{display:none;-webkit-flex-direction:row;flex-direction:row;-webkit-align-items:center;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1px solid #182336;}
 @media(max-width:680px){
-  #trumpBadge{
-    margin-top:3px;padding-top:3px;border-top:1px solid #182336;
-    gap:4px;
-    -webkit-justify-content:space-between;justify-content:space-between;
-  }
+  #trumpBadge{margin-top:3px;padding-top:3px;border-top:1px solid #182336;gap:4px;-webkit-justify-content:space-between;justify-content:space-between;}
 }
 .tb-label{font-size:clamp(9px,1.1vw,11px);color:#5a7a9a;text-transform:uppercase;letter-spacing:.5px;font-weight:700;-webkit-flex:1;flex:1;}
 @media(max-width:680px){.tb-label{font-size:9px;display:block;-webkit-flex:unset;flex:unset;}}
@@ -146,22 +128,23 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .tb-note{font-size:clamp(8px,1vw,10px);color:#556;font-weight:600;}
 @media(max-width:680px){.tb-note{font-size:8px;}}
 
-/* ── TABLE AREA ─────────────────────────────────────── */
-/* Desktop: table-area stays full minus side log */
-/* Mobile: table-area moves down by scoreboard strip height */
+/* ── ROOT VARIABLES ── */
 :root{
   --topbar-h: clamp(38px,6vh,48px);
-  --score-strip-h: 0px;   /* no longer a top strip on mobile */
-  --score-side-w: 64px;   /* width of vertical scoreboard on mobile */
+  --score-strip-h: 0px;
+  --score-side-w: 64px;
   --hand-h: clamp(100px,18vh,130px);
   --sidelog-w: clamp(130px,16vw,200px);
+  --mlh-h: 0px;
 }
+
+/* ── TABLE AREA ── */
 .table-area{
   position:absolute;
   top:var(--topbar-h);
   left:0;
   right:var(--sidelog-w);
-  bottom:clamp(44px,8vh,60px); /* always leave bottomBar space */
+  bottom:clamp(44px,8vh,60px);
   display:-webkit-flex;
   display:flex;
   -webkit-align-items:center;
@@ -173,12 +156,13 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 @media(max-width:680px){
   .table-area{
     top:var(--topbar-h);
-    left:var(--score-side-w);  /* shift right of vertical scoreboard */
+    left:var(--score-side-w);
     right:0;
+    bottom:clamp(44px,8vh,60px);
   }
 }
 
-/* FELT TABLE — oval */
+/* FELT TABLE */
 .felt-table{
   position:relative;
   background:#14683e;
@@ -217,10 +201,7 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 @keyframes startPulse{0%,100%{box-shadow:0 4px 18px rgba(255,213,79,.35)}50%{box-shadow:0 4px 32px rgba(255,213,79,.7)}}
 #btnStartTable:hover{background:linear-gradient(135deg,#ffe082,#ffd54f);}
 
-/* trick zone above already handles sizing */
-
-/* ── RIGHT SIDE PANEL (desktop only) ──────────────────── */
-/* Container wrapping log + last-trick, sits on the right */
+/* ── RIGHT SIDE PANEL (desktop only) ── */
 #rightPanel{
   position:absolute;
   right:6px;
@@ -236,7 +217,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 }
 @media(max-width:680px){#rightPanel{display:none;}}
 
-/* Side log — takes upper portion */
 #sideLog{
   -webkit-flex:1;
   flex:1;
@@ -250,33 +230,19 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 #sideLog .ll{font-size:clamp(9px,1vw,11px);color:#6a8aaa;margin-bottom:4px;line-height:1.4;}
 #sideLog .ll.sys{color:#ffd54f99;}
 
-/* Last trick panel — fixed height below log */
-#lastTrickPanel{
-  background:#0a1220;
-  border-radius:10px;
-  padding:7px 9px;
-  -webkit-flex-shrink:0;
-  flex-shrink:0;
-}
+#lastTrickPanel{background:#0a1220;border-radius:10px;padding:7px 9px;-webkit-flex-shrink:0;flex-shrink:0;}
 #lastTrickPanel .lt-title{font-size:10px;color:#4a6a8a;letter-spacing:.8px;text-transform:uppercase;font-weight:600;margin-bottom:6px;}
 #lastTrickPanel .lt-cards{display:-webkit-flex;display:flex;gap:5px;-webkit-align-items:center;align-items:center;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;}
 #lastTrickPanel .lt-empty{font-size:10px;color:#2a3a50;font-style:italic;}
 .lt-card-wrap{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;gap:2px;}
 .lt-seat-lbl{font-size:8px;color:#4a6a8a;letter-spacing:.2px;}
-.lt-mini-card{display:-webkit-inline-flex;display:inline-flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between;background:#fff;border-radius:5px;padding:3px 5px;width:32px;height:44px;font-weight:700;font-size:10px;color:#111;box-shadow:0 2px 6px rgba(0,0,0,.55);}
-.lt-mini-card.red-c{color:#c62828;}
-.lt-mini-card .ltmc-suit{font-size:16px;color:inherit;}
 .lt-winner{font-size:9px;color:#ffd54f;font-weight:700;margin-top:4px;text-align:center;}
 
-/* ── MOBILE LAST TRICK PANEL — disabled (right-side version hidden) ── */
 #mobileTrickPanel{display:none!important;}
 
-/* ── MOBILE LAST HAND STRIP ─────────────────────────────────────────
-   Portrait bar: sits above the hand strip on mobile.
-   Cards arranged in a horizontal row, each card in portrait (tall) orientation.
-   Desktop: hidden — desktop uses #lastTrickPanel inside #rightPanel.       */
+/* ── MOBILE LAST HAND STRIP ── */
 #mobileLastHand{
-  display:none; /* shown only on mobile via media query */
+  display:none;
   position:absolute;
   left:var(--score-side-w);
   right:0;
@@ -295,72 +261,20 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
   gap:3px;
   overflow:hidden;
 }
-@media(max-width:680px){
-  :root{ --mlh-h: 62px; }
-  #mobileLastHand{ display:-webkit-flex; display:flex; }
-  .table-area{ right:0!important; bottom:calc(var(--hand-h) + var(--mlh-h))!important; }
-  #handStrip{ left:var(--score-side-w)!important; right:0!important; }
-  #bottomBar{ left:var(--score-side-w)!important; right:0!important; }
-}
-/* Header row inside the strip */
-.mlh-header{
-  display:-webkit-flex;
-  display:flex;
-  -webkit-align-items:center;
-  align-items:center;
-  -webkit-justify-content:space-between;
-  justify-content:space-between;
-  width:100%;
-  gap:6px;
-}
+.mlh-header{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between;width:100%;gap:6px;}
 .mlh-title{font-size:8px;color:#4a6a8a;letter-spacing:.7px;text-transform:uppercase;font-weight:700;white-space:nowrap;}
 .mlh-winner{font-size:8px;color:#ffd54f;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-/* Cards row — portrait cards side by side */
-.mlh-cards{
-  display:-webkit-flex;
-  display:flex;
-  -webkit-flex-direction:row;
-  flex-direction:row;
-  gap:7px;
-  -webkit-align-items:center;
-  align-items:center;
-  -webkit-justify-content:center;
-  justify-content:center;
-}
-/* Each card column: seat label on top, portrait card below */
-.mlh-card-col{
-  display:-webkit-flex;
-  display:flex;
-  -webkit-flex-direction:column;
-  flex-direction:column;
-  -webkit-align-items:center;
-  align-items:center;
-  gap:2px;
-}
+.mlh-cards{display:-webkit-flex;display:flex;-webkit-flex-direction:row;flex-direction:row;gap:7px;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;}
+.mlh-card-col{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;gap:2px;}
 .mlh-seat-lbl{font-size:7px;color:#4a6a8a;font-weight:600;letter-spacing:.2px;}
-/* Portrait mini card */
-.mlh-mini-card{
-  display:-webkit-inline-flex;
-  display:inline-flex;
-  -webkit-flex-direction:column;
-  flex-direction:column;
-  -webkit-align-items:center;
-  align-items:center;
-  -webkit-justify-content:space-between;
-  justify-content:space-between;
-  background:#fff;
-  border-radius:4px;
-  padding:2px 4px;
-  width:26px;
-  height:36px;
-  font-weight:700;
-  font-size:8px;
-  color:#111;
-  box-shadow:0 1px 4px rgba(0,0,0,.55);
-}
+.mlh-mini-card{display:-webkit-inline-flex;display:inline-flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between;background:#fff;border-radius:4px;padding:2px 4px;width:26px;height:36px;font-weight:700;font-size:8px;color:#111;box-shadow:0 1px 4px rgba(0,0,0,.55);}
 .mlh-mini-card.red-c{color:#c62828;}
 .mlh-mini-card .mlhmc-suit{font-size:13px;line-height:1;color:inherit;}
-/* Legacy mtp classes kept for desktop render path */
+
+/* legacy desktop mini card classes */
+.lt-mini-card{display:-webkit-inline-flex;display:inline-flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between;background:#fff;border-radius:5px;padding:3px 5px;width:32px;height:44px;font-weight:700;font-size:10px;color:#111;box-shadow:0 2px 6px rgba(0,0,0,.55);}
+.lt-mini-card.red-c{color:#c62828;}
+.lt-mini-card .ltmc-suit{font-size:16px;line-height:1;color:inherit;}
 .mtp-title{font-size:8px;color:#4a6a8a;letter-spacing:.6px;text-transform:uppercase;font-weight:600;flex-shrink:0;width:100%;text-align:center;}
 .mtp-cards{display:flex;flex-direction:column;flex-wrap:nowrap;align-items:center;gap:4px;width:100%;}
 .mtp-card-col{display:flex;flex-direction:row;align-items:center;gap:5px;width:100%;}
@@ -370,30 +284,7 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .mtp-mini-card .mtpmc-suit{font-size:11px;line-height:1;color:inherit;}
 .mtp-winner{font-size:7px;color:#ffd54f;font-weight:700;text-align:center;width:100%;}
 
-/* Also fix desktop mini cards — same explicit color issue */
-.lt-mini-card{
-  display:-webkit-inline-flex;
-  display:inline-flex;
-  -webkit-flex-direction:column;
-  flex-direction:column;
-  -webkit-align-items:center;
-  align-items:center;
-  -webkit-justify-content:space-between;
-  justify-content:space-between;
-  background:#fff;
-  border-radius:5px;
-  padding:3px 5px;
-  width:32px;
-  height:44px;
-  font-weight:700;
-  font-size:10px;
-  color:#111;           /* explicit dark */
-  box-shadow:0 2px 6px rgba(0,0,0,.55);
-}
-.lt-mini-card.red-c{color:#c62828;}
-.lt-mini-card .ltmc-suit{font-size:16px;line-height:1;color:inherit;}
-
-/* TRICK SLOTS — no border/mark */
+/* TRICK SLOTS */
 .trick-zone{position:absolute;top:0;right:0;bottom:0;left:0;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;}
 .trick-grid{--tg:clamp(190px,32vw,340px);width:var(--tg);height:calc(var(--tg)*.74);position:relative;}
 @media(max-width:680px){.trick-grid{--tg:clamp(180px,60vw,270px);}}
@@ -414,22 +305,158 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 .plaque .btn-sit{margin-top:2px;padding:3px 9px;border:none;border-radius:6px;background:#1976d2;color:#fff;font-size:clamp(8px,1vw,10px);font-weight:700;cursor:pointer;pointer-events:all;}
 .plaque .btn-sit:hover{background:#1565c0;}
 
-/* HAND STRIP */
+/* HAND STRIP — desktop */
 #handStrip{position:absolute;bottom:0;left:0;right:var(--sidelog-w);height:var(--hand-h);background:-webkit-linear-gradient(bottom,#050709 0%,transparent 100%);background:linear-gradient(to top,#050709 0%,transparent 100%);display:none;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:0 8px;z-index:15;overflow:hidden;}
+
+/* portrait mobile hand strip */
 @media(max-width:680px){
-  #handStrip{right:0!important;height:clamp(180px,38vh,260px);}
-  :root{--hand-h:clamp(180px,38vh,260px);}
-}
-#handInner{display:-webkit-flex;display:flex;gap:clamp(4px,.8vw,8px);-webkit-align-items:flex-end;align-items:flex-end;overflow-x:auto;overflow-y:visible;padding:6px 4px 8px;max-width:100%;scrollbar-width:thin;scrollbar-color:#2a3a50 transparent;-webkit-overflow-scrolling:touch;}
-#handInner::-webkit-scrollbar{height:3px;}
-#handInner::-webkit-scrollbar-thumb{background:#2a3a50;border-radius:3px;}
-@media(max-width:680px){
-  #handStrip{overflow-y:auto;overflow-x:hidden;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:flex-start;align-items:flex-start;padding:4px 6px;}
-  #handInner{-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;overflow-x:visible;overflow-y:auto;max-width:100%;width:100%;padding:4px 2px;gap:clamp(3px,.6vw,6px);}
+  :root{
+    --hand-h: clamp(180px,38vh,260px);
+    --mlh-h: 62px;
+  }
+  #handStrip{
+    right:0!important;
+    left:var(--score-side-w)!important;
+    height:var(--hand-h)!important;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-justify-content:flex-start;
+    justify-content:flex-start;
+    -webkit-align-items:flex-start;
+    align-items:flex-start;
+    padding:4px 6px;
+  }
+  #handInner{
+    -webkit-flex-direction:column;
+    flex-direction:column;
+    -webkit-align-items:center;
+    align-items:center;
+    -webkit-flex-wrap:nowrap;
+    flex-wrap:nowrap;
+    overflow-x:visible;
+    overflow-y:auto;
+    max-width:100%;
+    width:100%;
+    padding:4px 2px;
+    gap:clamp(3px,.6vw,6px);
+  }
   #handInner::-webkit-scrollbar{width:3px;height:0;}
   .card{width:clamp(44px,12vw,64px);height:clamp(62px,17vw,90px);font-size:clamp(11px,3vw,15px);}
   .card-suit{font-size:clamp(18px,5vw,28px);}
+  #mobileLastHand{display:-webkit-flex;display:flex;}
+  #bottomBar{left:var(--score-side-w)!important;right:0!important;}
 }
+
+/* ── LANDSCAPE PHONE — the key fix ── */
+/* Target by height so it works regardless of width (fixes Android WebView) */
+@media(max-height:500px) and (orientation:landscape){
+  #rotateNudge{display:none!important;}
+
+  :root{
+    --hand-h: 100px;
+    --mlh-h: 0px;
+    --score-side-w: 56px;
+  }
+
+  /* Score panel compact */
+  #scorePanel{
+    width:var(--score-side-w)!important;
+    padding:4px 3px!important;
+    bottom:0!important;
+  }
+  .sp-pts{font-size:14px!important;}
+  .sp-team{font-size:9px!important;}
+  .sp-val{font-size:9px!important;}
+  .sp-lbl{font-size:8px!important;}
+  .sp-divider{margin:2px 0!important;}
+  .sp-row{margin-bottom:2px!important;}
+  .tb-suit{font-size:14px!important;}
+  .tb-label{font-size:8px!important;}
+
+  /* Hand strip: horizontal row */
+  #handStrip{
+    height:var(--hand-h)!important;
+    left:var(--score-side-w)!important;
+    right:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-align-items:center!important;
+    align-items:center!important;
+    -webkit-justify-content:flex-start!important;
+    justify-content:flex-start!important;
+    padding:4px 8px!important;
+  }
+
+  #handInner{
+    -webkit-flex-direction:row!important;
+    flex-direction:row!important;
+    -webkit-align-items:center!important;
+    align-items:center!important;
+    -webkit-flex-wrap:nowrap!important;
+    flex-wrap:nowrap!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    width:auto!important;
+    max-width:none!important;
+    gap:5px!important;
+    padding:4px 4px!important;
+  }
+  #handInner::-webkit-scrollbar{height:3px;width:0;}
+
+  /* Smaller cards */
+  .card{
+    width:clamp(38px,7vh,56px)!important;
+    height:clamp(54px,10vh,78px)!important;
+    font-size:clamp(9px,1.6vh,13px)!important;
+    padding:3px 4px!important;
+    flex-shrink:0!important;
+  }
+  .card-suit{font-size:clamp(16px,3vh,24px)!important;}
+  .card.trick-card{font-size:clamp(9px,1.6vh,13px)!important;}
+  .card.trick-card .card-suit{font-size:clamp(16px,3vh,24px)!important;}
+
+  /* Trump buttons compact */
+  #trumpBtnGroup{gap:3px!important;margin-left:5px!important;}
+  #revealTrumpBtn{font-size:9px!important;padding:4px 7px!important;}
+  #notNowBtn{font-size:8px!important;padding:3px 7px!important;}
+
+  /* Hide last hand strip in landscape — no space for it */
+  #mobileLastHand{display:none!important;}
+
+  /* Table area: fill available space above hand strip */
+  .table-area{
+    top:var(--topbar-h)!important;
+    left:var(--score-side-w)!important;
+    right:0!important;
+    bottom:var(--hand-h)!important;
+  }
+
+  /* Bottom bar */
+  #bottomBar{
+    left:var(--score-side-w)!important;
+    right:0!important;
+    height:40px!important;
+  }
+
+  /* Felt table: use available height to size */
+  .felt-table{
+    width:min(
+      calc(100% - 4px),
+      calc((100vh - var(--topbar-h) - var(--hand-h) - 4px) * 1.85)
+    )!important;
+  }
+
+  /* Trick grid: smaller in landscape */
+  .trick-grid{--tg:clamp(140px,38vh,220px)!important;}
+  .tslot{
+    width:clamp(36px,6vh,56px)!important;
+    height:clamp(50px,8.5vh,78px)!important;
+  }
+}
+
+#handInner{display:-webkit-flex;display:flex;gap:clamp(4px,.8vw,8px);-webkit-align-items:flex-end;align-items:flex-end;overflow-x:auto;overflow-y:visible;padding:6px 4px 8px;max-width:100%;scrollbar-width:thin;scrollbar-color:#2a3a50 transparent;-webkit-overflow-scrolling:touch;}
+#handInner::-webkit-scrollbar{height:3px;}
+#handInner::-webkit-scrollbar-thumb{background:#2a3a50;border-radius:3px;}
 
 /* REVEAL TRUMP BTN GROUP */
 #trumpBtnGroup{flex-shrink:0;display:none;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;gap:5px;-webkit-align-self:center;align-self:center;margin-left:8px;}
@@ -519,7 +546,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
     <button class="btn-icon-tb" id="btnFullscreen" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
   </div>
 
-  <!-- SCOREBOARD (desktop: left panel | mobile: horizontal strip) -->
   <div id="scorePanel">
     <div class="sp-title">Score</div>
     <div class="sp-row"><span class="sp-team">S+N</span><span class="sp-pts" id="spT1">0</span></div>
@@ -533,7 +559,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
     </div>
   </div>
 
-  <!-- Desktop right panel: log on top + last trick below -->
   <div id="rightPanel">
     <div id="sideLog"></div>
     <div id="lastTrickPanel">
@@ -543,14 +568,12 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
     </div>
   </div>
 
-  <!-- Mobile: vertical last-trick panel on the right (hidden) -->
   <div id="mobileTrickPanel">
     <div class="mtp-title">Last Hand</div>
     <div class="mtp-cards" id="mtpCards"><span style="font-size:8px;color:#2a3a50">—</span></div>
     <div class="mtp-winner" id="mtpWinner"></div>
   </div>
 
-  <!-- Mobile: portrait last-hand strip above the hand strip -->
   <div id="mobileLastHand">
     <div class="mlh-header">
       <span class="mlh-title">Last Hand</span>
@@ -583,7 +606,7 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 
   <div id="handStrip">
     <div id="handInner"></div>
-    <div id="trumpBtnGroup" style="display:none;flex-shrink:0;display:none;flex-direction:column;align-items:center;gap:4px;align-self:center;margin-left:8px;">
+    <div id="trumpBtnGroup" style="display:none;flex-shrink:0;flex-direction:column;align-items:center;gap:4px;align-self:center;margin-left:8px;">
       <button id="revealTrumpBtn" onclick="clickRevealTrump()">🃏 Reveal Trump</button>
       <button id="notNowBtn" onclick="clickNotNow()">Not Now</button>
     </div>
@@ -643,14 +666,10 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
       <div style="font-size:18px;font-weight:800;color:#8ab4f8;">⚙️ Edit Room</div>
       <button onclick="closeRoomEditor()" style="background:none;border:1.5px solid #1c2f50;color:#5a8aaa;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px;">✕</button>
     </div>
-
-    <!-- TABS -->
     <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid #0e1e34;">
       <div class="re-tab active" id="reTabTheme" onclick="switchReTab('theme')" style="flex:1;padding:9px;font-size:12px;font-weight:700;color:#8ab4f8;cursor:pointer;border-bottom:2px solid #4a90d9;text-align:center;">🎨 Theme</div>
       <div class="re-tab" id="reTabRules" onclick="switchReTab('rules')" style="flex:1;padding:9px;font-size:12px;font-weight:700;color:#2a5080;cursor:pointer;border-bottom:2px solid transparent;text-align:center;">🛡️ Rules</div>
     </div>
-
-    <!-- THEME PANE -->
     <div id="reThemePane">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
         <div>
@@ -680,8 +699,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
       </div>
       <button onclick="applyReTheme()" style="width:100%;padding:10px;background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#1a0e00;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:6px;">Apply Theme Preview</button>
     </div>
-
-    <!-- RULES PANE -->
     <div id="reRulesPane" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #0e1e34;">
         <div>
@@ -706,7 +723,6 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
         <input type="number" id="reMinChips" min="0" value="0" style="width:100%;padding:9px 12px;background:#070f1c;border:1.5px solid #1c2f50;border-radius:8px;color:#e8eaf6;font-size:14px;outline:none;">
       </div>
     </div>
-
     <div id="reErr" style="color:#ef5350;font-size:12px;min-height:16px;margin-top:6px;"></div>
     <div id="reOk" style="color:#66bb6a;font-size:12px;min-height:16px;"></div>
     <div style="display:flex;gap:10px;margin-top:14px;">
@@ -735,12 +751,9 @@ const MY_CLIENT_ID=(()=>{let id=sessionStorage.getItem('29_cid');if(!id){id='c_'
 function getSavedName(){return sessionStorage.getItem('29_pname')||localStorage.getItem('29_pname')||'';}
 function saveName(n){sessionStorage.setItem('29_pname',n);localStorage.setItem('29_pname',n);}
 
-// ── AUTH ─────────────────────────────────────────────────
 const AUTH_TOKEN = localStorage.getItem('29_token')||null;
 let currentUser  = null;
 let guestInfo    = null;
-
-// Synchronous guest name — always available immediately, no async dependency
 const GUEST_NAME_SYNC = localStorage.getItem('29_gname')||null;
 
 (async function loadMe(){
@@ -754,16 +767,14 @@ const GUEST_NAME_SYNC = localStorage.getItem('29_gname')||null;
     try{
       const r=await fetch(`/api/guest/me?clientId=${MY_CLIENT_ID}`);
       if(r.ok){const d=await r.json();guestInfo=d;}
-      else { guestInfo={name:GUEST_NAME_SYNC, chips:0, clientId:MY_CLIENT_ID}; }
+      else{guestInfo={name:GUEST_NAME_SYNC,chips:0,clientId:MY_CLIENT_ID};}
     }catch(e){
-      // offline fallback — still set name so sit doesn't prompt
-      guestInfo={name:GUEST_NAME_SYNC, chips:0, clientId:MY_CLIENT_ID};
+      guestInfo={name:GUEST_NAME_SYNC,chips:0,clientId:MY_CLIENT_ID};
     }
   }
   updateChipsPill();
 })();
 
-// Helper: get current player's display name synchronously (no async needed)
 function getMyName(){
   if(currentUser) return currentUser.displayName;
   if(guestInfo)   return guestInfo.name;
@@ -796,6 +807,11 @@ function absSeat(slot){return mySeat===null?slot:(slot+mySeat)%4;}
 const ROOM_ID=new URLSearchParams(window.location.search).get('room')||'';
 if(!ROOM_ID)window.location.href='/lobby';
 document.getElementById('roomCode').textContent='Room '+ROOM_ID;
+
+// ── helpers ──────────────────────────────────────────────
+function isLandscapePhone(){
+  return window.innerHeight <= 500 && window.innerWidth > window.innerHeight;
+}
 
 // ── API ──────────────────────────────────────────────────
 async function api(url,method='GET',body=null){
@@ -846,25 +862,13 @@ function render(st){
   const aiTakeover=Array.isArray(st.aiTakeover)?st.aiTakeover:[false,false,false,false];
   const seated=mySeat!==null&&!aiTakeover[mySeat];
 
-  // Apply room theme once
-  if(!_themeApplied && st.theme){
-    applyTheme(st.theme);
-    _themeApplied=true;
-  }
+  if(!_themeApplied && st.theme){applyTheme(st.theme);_themeApplied=true;}
 
-  // Show room owner
   const ownerTag=document.getElementById('ownerTag');
-  if(ownerTag && st.ownerDisplay){
-    ownerTag.textContent='👤 '+st.ownerDisplay;
-    ownerTag.style.display='inline';
-  }
-  // Update viewer count
+  if(ownerTag && st.ownerDisplay){ownerTag.textContent='👤 '+st.ownerDisplay;ownerTag.style.display='inline';}
   const vcEl=document.getElementById('viewerCount');
   const vpEl=document.getElementById('viewerPill');
-  if(vcEl&&vpEl&&st.viewerCount!==undefined){
-    vcEl.textContent=st.viewerCount;
-    vpEl.style.display='inline-flex';
-  }
+  if(vcEl&&vpEl&&st.viewerCount!==undefined){vcEl.textContent=st.viewerCount;vpEl.style.display='inline-flex';}
   const editBtn=document.getElementById('btnEditRoom');
   if(editBtn) editBtn.style.display=(currentUser && st.ownerDisplay===currentUser.username)?'inline-flex':'none';
 
@@ -880,17 +884,40 @@ function render(st){
   renderPlaques(st,seated);
   renderTrickSlots(st);
 
+  const tableArea = document.querySelector('.table-area');
+  const landscape = isLandscapePhone();
+  const mlh = document.getElementById('mobileLastHand');
+
   if(seated){
     document.getElementById('handStrip').style.display='flex';
     document.getElementById('bottomBar').style.display='none';
-    document.querySelector('.table-area').style.bottom='var(--hand-h)';
+
+    if(landscape){
+      // landscape phone: table fills to hand strip, no last-hand strip
+      tableArea.style.bottom='var(--hand-h)';
+      if(mlh) mlh.style.display='none';
+    } else if(window.innerWidth<=680){
+      // portrait mobile: table fills above both strips
+      const mlhH=62;
+      tableArea.style.bottom='calc(var(--hand-h) + '+mlhH+'px)';
+      if(mlh){
+        mlh.style.display='flex';
+        mlh.style.height=mlhH+'px';
+      }
+    } else {
+      // desktop
+      tableArea.style.bottom='var(--hand-h)';
+      if(mlh) mlh.style.display='none';
+    }
+
     renderHandStrip(st);
     renderBiddingOverlay(st);
     renderTrumpOverlay(st);
     renderResultOverlay(st,true);
-  }else{
+  } else {
     document.getElementById('handStrip').style.display='none';
-    document.querySelector('.table-area').style.bottom='clamp(44px,8vh,60px)';
+    if(mlh) mlh.style.display='none';
+    tableArea.style.bottom='clamp(44px,8vh,60px)';
     renderBottomBar(st);
     renderResultOverlay(st,false);
   }
@@ -899,33 +926,19 @@ function render(st){
 
 // ── THEME ─────────────────────────────────────────────────
 function applyTheme(theme){
-  const gs = document.getElementById('gameScreen');
-  const felt = document.getElementById('feltTable');
+  const gs=document.getElementById('gameScreen');
+  const felt=document.getElementById('feltTable');
   if(!theme) return;
-
-  // Background color or image
-  if(theme.bgImage){
-    gs.style.background=`url('${theme.bgImage}') center/cover no-repeat`;
-    gs.style.backgroundBlendMode='luminosity';
-  } else if(theme.bgColor){
-    gs.style.background=theme.bgColor;
-  }
-
-  // Felt table color
-  if(felt && theme.tableColor){
-    felt.style.background=theme.tableColor;
-  }
-
-  // Border / accent color via CSS custom property
+  if(theme.bgImage){gs.style.background=`url('${theme.bgImage}') center/cover no-repeat`;gs.style.backgroundBlendMode='luminosity';}
+  else if(theme.bgColor){gs.style.background=theme.bgColor;}
+  if(felt && theme.tableColor){felt.style.background=theme.tableColor;}
   if(theme.borderColor){
     document.documentElement.style.setProperty('--theme-border',theme.borderColor);
-    const panels=document.querySelectorAll('#scorePanel,#sideLog,.phase-pill');
-    panels.forEach(p=>p.style.borderColor=theme.borderColor);
+    document.querySelectorAll('#scorePanel,#sideLog,.phase-pill').forEach(p=>p.style.borderColor=theme.borderColor);
   }
   if(theme.accentColor){
     document.documentElement.style.setProperty('--theme-accent',theme.accentColor);
-    const felts=document.querySelectorAll('.tb-title');
-    felts.forEach(el=>el.style.color=theme.accentColor);
+    document.querySelectorAll('.tb-title').forEach(el=>el.style.color=theme.accentColor);
   }
 }
 
@@ -935,23 +948,19 @@ function renderTopbar(st,seated){
   document.getElementById('btnLeave').style.display=seated?'block':'none';
 }
 
-// ── SCOREBOARD (works on both desktop panel + mobile strip) ──
 function renderScorePanel(st){
   const inGame=['bidding','trump','playing','finished','matchOver'].includes(st.phase);
   const panel=document.getElementById('scorePanel');
-  const isMobile=window.innerWidth<=680;
-
+  const isMobile=window.innerWidth<=680||isLandscapePhone();
   if(!inGame){panel.style.display='none';return;}
   panel.style.display=isMobile?'flex':'block';
-
   const t1=st.team1Score||0,t2=st.team2Score||0;
   const e1=document.getElementById('spT1'),e2=document.getElementById('spT2');
   e1.textContent=(t1>0?'+':'')+t1;e1.style.color=t1>0?'#4fc3f7':t1<0?'#ef5350':'#8ab4f8';
   e2.textContent=(t2>0?'+':'')+t2;e2.style.color=t2>0?'#4fc3f7':t2<0?'#ef5350':'#8ab4f8';
-
   const bidRow=document.getElementById('spBidRow'),handRow=document.getElementById('spHandRow');
   if(st.currentBid>15&&['bidding','trump','playing','finished'].includes(st.phase)){
-    bidRow.style.display=isMobile?'flex':'flex';
+    bidRow.style.display='flex';
     document.getElementById('spBid').textContent=`${st.currentBid}·${SEAT_NAMES[st.highestBidder][0]}`;
   }else bidRow.style.display='none';
   if(['playing','finished'].includes(st.phase)){
@@ -976,35 +985,19 @@ function renderTrumpBadge(st){
   }
 }
 
-// ── SOUND ENGINE (iOS-compatible) ───────────────────────
+// ── SOUND ENGINE ─────────────────────────────────────────
 let soundEnabled=true;
 let actx=null;
-
 function getACtx(){
-  if(!actx){
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(AC)actx=new AC();
-    }catch(e){}
-  }
-  // iOS: AudioContext starts suspended until user gesture resumes it
-  if(actx&&actx.state==='suspended'){
-    actx.resume().catch(()=>{});
-  }
+  if(!actx){try{const AC=window.AudioContext||window.webkitAudioContext;if(AC)actx=new AC();}catch(e){}}
+  if(actx&&actx.state==='suspended'){actx.resume().catch(()=>{});}
   return actx;
 }
-
-// Unlock AudioContext on first any user touch/click (iOS requirement)
 function unlockAudio(){
   const ctx=getACtx();
   if(ctx&&ctx.state==='suspended'){
     ctx.resume().then(()=>{
-      // play silent buffer to unlock
-      try{
-        const buf=ctx.createBuffer(1,1,22050);
-        const src=ctx.createBufferSource();
-        src.buffer=buf;src.connect(ctx.destination);src.start(0);
-      }catch(e){}
+      try{const buf=ctx.createBuffer(1,1,22050);const src=ctx.createBufferSource();src.buffer=buf;src.connect(ctx.destination);src.start(0);}catch(e){}
     }).catch(()=>{});
   }
 }
@@ -1025,7 +1018,6 @@ function playTone(freq,type,dur,vol,delay){
     osc.stop(ctx.currentTime+delay+dur+0.01);
   }catch(e){}
 }
-
 const Sounds={
   cardPlay:function(){playTone(520,'sine',.08,.18);playTone(300,'triangle',.12,.1,.05);},
   bid:function(){playTone(660,'sine',.12,.2);playTone(780,'sine',.1,.15,.12);},
@@ -1035,35 +1027,26 @@ const Sounds={
   shuffle:function(){
     var ctx=getACtx();if(!ctx||!soundEnabled)return;
     try{
-      for(var i=0;i<18;i++){
-        (function(idx){
-          var buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.04),ctx.sampleRate);
-          var d=buf.getChannelData(0);
-          for(var j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*.3;
-          var src=ctx.createBufferSource(),g=ctx.createGain();
-          src.buffer=buf;src.connect(g);g.connect(ctx.destination);
-          var t=ctx.currentTime+idx*.06;
-          g.gain.setValueAtTime(.28,t);
-          g.gain.exponentialRampToValueAtTime(0.001,t+.05);
-          src.start(t);
-        })(i);
-      }
+      for(var i=0;i<18;i++){(function(idx){
+        var buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.04),ctx.sampleRate);
+        var d=buf.getChannelData(0);for(var j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*.3;
+        var src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=buf;src.connect(g);g.connect(ctx.destination);
+        var t=ctx.currentTime+idx*.06;g.gain.setValueAtTime(.28,t);g.gain.exponentialRampToValueAtTime(0.001,t+.05);src.start(t);
+      })(i);}
     }catch(e){}
   },
   win:function(){[0,1,2,3,4].forEach(function(i){playTone(330+i*110,'sine',.22,.22,i*.1);});},
   fail:function(){[0,1,2].forEach(function(i){playTone(280-i*40,'sawtooth',.2,.18,i*.12);});},
 };
-
 function toggleSound(){
   soundEnabled=!soundEnabled;
   var btn=document.getElementById('btnSound');
   btn.textContent=soundEnabled?'🔊':'🔇';
   btn.classList.toggle('active',soundEnabled);
-  // Re-unlock on toggle tap (iOS)
   unlockAudio();
 }
 
-// ── FULLSCREEN (iOS-safe) ────────────────────────────────
+// ── FULLSCREEN ───────────────────────────────────────────
 function toggleFullscreen(){
   var isFS=!!(document.fullscreenElement||document.webkitFullscreenElement);
   var btn=document.getElementById('btnFullscreen');
@@ -1071,11 +1054,7 @@ function toggleFullscreen(){
     var el=document.documentElement;
     var req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
     if(req){req.call(el);btn.textContent='⊡';}
-    else{
-      // iOS Safari: no fullscreen API — toggle a "fake fullscreen" via scroll lock hint
-      btn.title='Fullscreen not supported on this browser';
-      btn.style.opacity='0.4';
-    }
+    else{btn.title='Fullscreen not supported on this browser';btn.style.opacity='0.4';}
   }else{
     var ex=document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen;
     if(ex)ex.call(document);
@@ -1089,95 +1068,60 @@ function toggleFullscreen(){
   });
 });
 
-// ── LAST TRICK DISPLAY ───────────────────────────────────
-// Stores the last completed trick: array of {player, card} plus winningSeat
+// ── LAST TRICK ───────────────────────────────────────────
 var lastTrick = null;
-
 var SEAT_SHORT = ['S','W','N','E'];
 
-function renderLastTrick(st) {
-  // Capture trick when it's complete (4 cards) and about to be cleared
-  var trick = st.lastCompletedTrick || (st.currentTrick && st.currentTrick.length === 4 ? st.currentTrick : null);
-  var winner = st.lastTrickWinner !== undefined ? st.lastTrickWinner : null;
-
-  if (trick && trick.length === 4) {
-    lastTrick = { cards: trick, winner: winner };
-  }
-
-  // Desktop panel
-  var ltCards = document.getElementById('ltCards');
-  var ltWinner = document.getElementById('ltWinner');
-  // Mobile portrait strip
-  var mlhCards = document.getElementById('mlhCards');
-  var mlhWinner = document.getElementById('mlhWinner');
-
-  if (!lastTrick) {
-    if (ltCards) ltCards.innerHTML = '<span class="lt-empty">No trick yet</span>';
-    if (ltWinner) ltWinner.textContent = '';
-    if (mlhCards) mlhCards.innerHTML = '<span style="font-size:8px;color:#2a3a50;font-style:italic">No trick yet</span>';
-    if (mlhWinner) mlhWinner.textContent = '';
+function renderLastTrick(st){
+  var trick=st.lastCompletedTrick||(st.currentTrick&&st.currentTrick.length===4?st.currentTrick:null);
+  var winner=st.lastTrickWinner!==undefined?st.lastTrickWinner:null;
+  if(trick&&trick.length===4){lastTrick={cards:trick,winner:winner};}
+  var ltCards=document.getElementById('ltCards');
+  var ltWinner=document.getElementById('ltWinner');
+  var mlhCards=document.getElementById('mlhCards');
+  var mlhWinner=document.getElementById('mlhWinner');
+  if(!lastTrick){
+    if(ltCards)ltCards.innerHTML='<span class="lt-empty">No trick yet</span>';
+    if(ltWinner)ltWinner.textContent='';
+    if(mlhCards)mlhCards.innerHTML='<span style="font-size:8px;color:#2a3a50;font-style:italic">No trick yet</span>';
+    if(mlhWinner)mlhWinner.textContent='';
     return;
   }
-
-  // Order cards by seat slot so they read naturally around the table
-  var slotOrder = [0,1,2,3].map(function(slot){
-    var abs = absSeat(slot);
-    return lastTrick.cards.find(function(t){ return t.player === abs; });
+  var slotOrder=[0,1,2,3].map(function(slot){
+    var abs=absSeat(slot);
+    return lastTrick.cards.find(function(t){return t.player===abs;});
   }).filter(Boolean);
-
-  function isRed(card) { return card && (card.suit === '♥' || card.suit === '♦'); }
-
-  // Desktop: 4 mini cards side by side with seat label beneath
-  if (ltCards) {
-    ltCards.innerHTML = slotOrder.map(function(t) {
-      var red = isRed(t.card);
-      var isWin = lastTrick.winner === t.player;
-      return '<div class="lt-card-wrap">' +
-        '<div class="lt-mini-card' + (red ? ' red-c' : '') + '" style="' + (isWin ? 'box-shadow:0 0 8px 2px #ffd54f;border:1.5px solid #ffd54f;' : '') + '">' +
-          '<div>' + t.card.value + t.card.suit + '</div>' +
-          '<div class="ltmc-suit">' + t.card.suit + '</div>' +
-        '</div>' +
-        '<div class="lt-seat-lbl">' + SEAT_SHORT[t.player] + (isWin ? ' ★' : '') + '</div>' +
+  function isRed(card){return card&&(card.suit==='♥'||card.suit==='♦');}
+  if(ltCards){
+    ltCards.innerHTML=slotOrder.map(function(t){
+      var red=isRed(t.card);var isWin=lastTrick.winner===t.player;
+      return '<div class="lt-card-wrap">'+
+        '<div class="lt-mini-card'+(red?' red-c':'')+'" style="'+(isWin?'box-shadow:0 0 8px 2px #ffd54f;border:1.5px solid #ffd54f;':'')+'">'+'<div>'+t.card.value+t.card.suit+'</div>'+'<div class="ltmc-suit">'+t.card.suit+'</div>'+'</div>'+
+        '<div class="lt-seat-lbl">'+SEAT_SHORT[t.player]+(isWin?' ★':'')+'</div>'+
       '</div>';
     }).join('');
   }
-  if (ltWinner) {
-    ltWinner.textContent = lastTrick.winner !== null
-      ? 'Won by ' + SEAT_SHORT[lastTrick.winner] + ' · ' + TEAM_LABEL[lastTrick.winner]
-      : '';
-  }
-
-  // Mobile: portrait strip — 4 cards in a horizontal row, each card tall (portrait), seat label above
-  if (mlhCards) {
-    mlhCards.innerHTML = slotOrder.map(function(t) {
-      var red = isRed(t.card);
-      var isWin = lastTrick.winner === t.player;
-      return '<div class="mlh-card-col">' +
-        '<div class="mlh-seat-lbl" style="color:' + (isWin ? '#ffd54f' : '#4a6a8a') + ';font-weight:' + (isWin ? '800' : '600') + ';">' + SEAT_SHORT[t.player] + (isWin ? '★' : '') + '</div>' +
-        '<div class="mlh-mini-card' + (red ? ' red-c' : '') + '" style="' + (isWin ? 'box-shadow:0 0 6px 2px #ffd54f;border:1.5px solid #ffd54f;' : '') + '">' +
-          '<div>' + t.card.value + '</div>' +
-          '<div class="mlhmc-suit">' + t.card.suit + '</div>' +
-        '</div>' +
+  if(ltWinner){ltWinner.textContent=lastTrick.winner!==null?'Won by '+SEAT_SHORT[lastTrick.winner]+' · '+TEAM_LABEL[lastTrick.winner]:'';}
+  if(mlhCards){
+    mlhCards.innerHTML=slotOrder.map(function(t){
+      var red=isRed(t.card);var isWin=lastTrick.winner===t.player;
+      return '<div class="mlh-card-col">'+
+        '<div class="mlh-seat-lbl" style="color:'+(isWin?'#ffd54f':'#4a6a8a')+';font-weight:'+(isWin?'800':'600')+';">'+SEAT_SHORT[t.player]+(isWin?'★':'')+'</div>'+
+        '<div class="mlh-mini-card'+(red?' red-c':'')+'" style="'+(isWin?'box-shadow:0 0 6px 2px #ffd54f;border:1.5px solid #ffd54f;':'')+'">'+'<div>'+t.card.value+'</div>'+'<div class="mlhmc-suit">'+t.card.suit+'</div>'+'</div>'+
       '</div>';
     }).join('');
   }
-  if (mlhWinner) {
-    mlhWinner.textContent = lastTrick.winner !== null
-      ? TEAM_LABEL[lastTrick.winner] + ' wins'
-      : '';
-  }
+  if(mlhWinner){mlhWinner.textContent=lastTrick.winner!==null?TEAM_LABEL[lastTrick.winner]+' wins':'';}
 }
 
-function renderSideLog(st) {
-  // Restore the actual game log on desktop
-  var sl = document.getElementById('sideLog');
-  if (sl && st.gameLog) {
-    sl.innerHTML = st.gameLog.slice(-40).map(function(l) {
-      return '<div class="ll' + (l.type === 'system' ? ' sys' : '') + '">' + l.msg + '</div>';
+function renderSideLog(st){
+  var sl=document.getElementById('sideLog');
+  if(sl&&st.gameLog){
+    sl.innerHTML=st.gameLog.slice(-40).map(function(l){
+      return '<div class="ll'+(l.type==='system'?' sys':'')+'">'+l.msg+'</div>';
     }).join('');
-    sl.scrollTop = sl.scrollHeight;
+    sl.scrollTop=sl.scrollHeight;
   }
-  // Update last trick panel
   renderLastTrick(st);
 }
 
@@ -1186,18 +1130,9 @@ function renderTableCenter(st,seated){
   const btn=document.getElementById('btnStartTable');
   const humanCount=[0,1,2,3].filter(i=>st.seats[i]&&!st.aiTakeover?.[i]).length;
   if(st.phase==='waiting'){
-    if(seated && humanCount>=1){
-      btn.style.display='block';
-      msg.style.display='none';
-    } else {
-      btn.style.display='none';
-      msg.style.display='none';
-    }
-  } else {
-    btn.style.display='none';
-    msg.style.display='none';
-    msg.innerHTML='';
-  }
+    if(seated&&humanCount>=1){btn.style.display='block';msg.style.display='none';}
+    else{btn.style.display='none';msg.style.display='none';}
+  }else{btn.style.display='none';msg.style.display='none';msg.innerHTML='';}
 }
 
 function renderBottomBar(st){
@@ -1211,9 +1146,7 @@ function renderBottomBar(st){
   }else if(['bidding','trump','playing'].includes(phase)){
     bar.style.display='flex';
     bar.innerHTML=`<span class="bb-hint">👀 All seats taken · Room ${ROOM_ID}</span>`;
-  }else{
-    bar.style.display='none';
-  }
+  }else{bar.style.display='none';}
 }
 
 function renderPlaques(st,seated){
@@ -1228,7 +1161,6 @@ function renderPlaques(st,seated){
     const name=sd?(st.aiTakeover?.[abs]?`${sd.name} 🤖`:sd.name):'AI';
     const seatLbl=slot===0?'You ('+SEAT_NAMES[abs]+')':SEAT_NAMES[abs];
     const canSit=!seated&&isAi&&['waiting','bidding','trump','playing'].includes(st.phase);
-    // Owner crown + username sub-label
     const isOwner=sd&&sd.username&&sd.username===st.ownerDisplay;
     const ownerCrown=isOwner?'👑 ':'';
     const usernameSub=sd?.username&&!isAi?`<span style="font-size:9px;color:#ff8f00;font-weight:700;opacity:.85">@${sd.username}</span>`:'';
@@ -1241,21 +1173,12 @@ function renderPlaques(st,seated){
   }
 }
 
-// Track which players already had a card on table to detect new placements
-var _prevTrickPlayers = [];
-
+var _prevTrickPlayers=[];
 function renderTrickSlots(st){
-  var currentTrick = st.currentTrick || [];
-  var currentPlayers = currentTrick.map(function(t){ return t.player; });
-
-  // Play sound for each newly placed card (player appeared since last render)
-  currentPlayers.forEach(function(p){
-    if(_prevTrickPlayers.indexOf(p) === -1){
-      Sounds.cardPlay();
-    }
-  });
-  _prevTrickPlayers = currentPlayers.slice();
-
+  var currentTrick=st.currentTrick||[];
+  var currentPlayers=currentTrick.map(function(t){return t.player;});
+  currentPlayers.forEach(function(p){if(_prevTrickPlayers.indexOf(p)===-1){Sounds.cardPlay();}});
+  _prevTrickPlayers=currentPlayers.slice();
   for(let slot=0;slot<4;slot++){
     const abs=absSeat(slot);
     const el=document.getElementById(`ts${slot}`);
@@ -1281,15 +1204,14 @@ function renderHandStrip(st){
     if(!canPlay&&isMyTurn)el.classList.add('card-off');
     inner.appendChild(el);
   });
-  var shouldShowTrump = isMyTurn && canRevealTrump(st);
+  var shouldShowTrump=isMyTurn&&canRevealTrump(st);
   if(shouldShowTrump){
-    var trickCount = st.currentTrick ? st.currentTrick.length : 0;
-    var handNum = st.handNumber||0;
-    var key = handNum * 100 + trickCount;
-    if(key === _trumpDismissedForTurn) shouldShowTrump = false;
+    var trickCount=st.currentTrick?st.currentTrick.length:0;
+    var handNum=st.handNumber||0;
+    var key=handNum*100+trickCount;
+    if(key===_trumpDismissedForTurn)shouldShowTrump=false;
   }
-  document.getElementById('trumpBtnGroup').style.display = shouldShowTrump ? 'flex' : 'none';
-  if(shouldShowTrump) document.getElementById('trumpBtnGroup').style.display='flex';
+  document.getElementById('trumpBtnGroup').style.display=shouldShowTrump?'flex':'none';
 }
 
 function renderBiddingOverlay(st){
@@ -1338,20 +1260,13 @@ function renderResultOverlay(st,seated){
   if(isMatchOver){
     const wn=st.matchWinner===1?'South + North':'West + East';
     document.getElementById('resTitle').textContent=`🏆 ${wn} Win!`;
-
-    const WINNER_PTS = st.winReward || 4;
-    const myTeam = mySeat!==null ? ((mySeat===0||mySeat===2)?1:2) : null;
-    const iWon = myTeam!==null && myTeam===st.matchWinner;
-    const whoAmI = currentUser || guestInfo;
-    const rewardLine = whoAmI && mySeat!==null
-      ? `<div style="margin-top:10px;padding:8px 14px;background:rgba(255,213,79,.1);border:1px solid rgba(255,213,79,.25);border-radius:10px;text-align:center;">
-           ${iWon
-             ? `<span style="color:#ffd54f;font-weight:800;font-size:15px;">🪙 +${WINNER_PTS} chips!</span><div style="font-size:11px;color:#ff8f00;margin-top:3px;">Added to your balance</div>`
-             : `<span style="color:#8ab4f8;font-weight:700;font-size:13px;">Better luck next time!</span>`
-           }
-         </div>`
-      : '<div style="margin-top:8px;font-size:11px;color:#4a6a8a;text-align:center;">🔒 <a href="/" style="color:#8ab4f8;">Sign in</a> to earn chips</div>';
-
+    const WINNER_PTS=st.winReward||4;
+    const myTeam=mySeat!==null?((mySeat===0||mySeat===2)?1:2):null;
+    const iWon=myTeam!==null&&myTeam===st.matchWinner;
+    const whoAmI=currentUser||guestInfo;
+    const rewardLine=whoAmI&&mySeat!==null
+      ?`<div style="margin-top:10px;padding:8px 14px;background:rgba(255,213,79,.1);border:1px solid rgba(255,213,79,.25);border-radius:10px;text-align:center;">${iWon?`<span style="color:#ffd54f;font-weight:800;font-size:15px;">🪙 +${WINNER_PTS} chips!</span><div style="font-size:11px;color:#ff8f00;margin-top:3px;">Added to your balance</div>`:`<span style="color:#8ab4f8;font-weight:700;font-size:13px;">Better luck next time!</span>`}</div>`
+      :'<div style="margin-top:8px;font-size:11px;color:#4a6a8a;text-align:center;">🔒 <a href="/" style="color:#8ab4f8;">Sign in</a> to earn chips</div>';
     document.getElementById('resLines').innerHTML=`
       <table class="score-table">
         <tr><th class="tc">Team</th><th>Score</th><th>Hands</th></tr>
@@ -1360,15 +1275,9 @@ function renderResultOverlay(st,seated){
       </table>${rewardLine}`;
     const hasFree=[0,1,2,3].some(i=>!st.seats[i]||st.aiTakeover?.[i]);
     btns.innerHTML='';
-    if(seated){
-      btns.innerHTML=`<button style="background:#2e7d32;color:#fff" onclick="clickPlayAgain()">🔄 Play Again</button>
-        <button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;
-    }else if(hasFree){
-      btns.innerHTML=`<button style="background:#ffd54f;color:#1a1000" onclick="clickStart()">▶ Start New Game</button>
-        <button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;
-    }else{
-      btns.innerHTML=`<button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;
-    }
+    if(seated){btns.innerHTML=`<button style="background:#2e7d32;color:#fff" onclick="clickPlayAgain()">🔄 Play Again</button><button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;}
+    else if(hasFree){btns.innerHTML=`<button style="background:#ffd54f;color:#1a1000" onclick="clickStart()">▶ Start New Game</button><button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;}
+    else{btns.innerHTML=`<button style="background:#1f3456;color:#8ab4f8" onclick="goLobby()">← Lobby</button>`;}
     return;
   }
   const bidTeam=(st.highestBidder===0||st.highestBidder===2)?1:2;
@@ -1391,10 +1300,7 @@ function renderResultOverlay(st,seated){
 function positionPlaques(){
   var table=document.getElementById('feltTable');
   if(!table)return;
-  // Aspect-ratio polyfill for iOS Safari < 15
-  if(!CSS.supports('aspect-ratio','1')){
-    table.style.height=Math.round(table.offsetWidth/1.9)+'px';
-  }
+  if(!CSS.supports('aspect-ratio','1')){table.style.height=Math.round(table.offsetWidth/1.9)+'px';}
   var r=table.getBoundingClientRect();
   var cx=r.left+r.width/2,cy=r.top+r.height/2;
   var gap=13;
@@ -1403,7 +1309,18 @@ function positionPlaques(){
     el.style.left=pos[0]+'px';el.style.top=pos[1]+'px';
   });
 }
-window.addEventListener('resize',function(){positionPlaques();if(lastState)renderScorePanel(lastState);});
+
+window.addEventListener('resize',function(){
+  positionPlaques();
+  if(lastState){renderScorePanel(lastState);render(lastState);}
+});
+
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){
+    positionPlaques();
+    if(lastState)render(lastState);
+  },350);
+});
 
 // ── INPUT MODAL ──────────────────────────────────────────
 function showInputModal(title,defaultVal='',{validate,inputType='text',placeholder=''}={}){
@@ -1443,14 +1360,9 @@ function showGameError(msg){
   el.textContent=msg;el.style.display='block';
   clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none';},3500);
 }
-
 async function clickSit(seat){
-  const name = getMyName();
-  if(!name){
-    // Truly unknown — shouldn't happen if landing flow was followed
-    showGameError('Could not determine your name. Please return to lobby.');
-    return;
-  }
+  const name=getMyName();
+  if(!name){showGameError('Could not determine your name. Please return to lobby.');return;}
   Sounds.sit();
   const result=await api('/api/sit','POST',{seat,clientId:MY_CLIENT_ID,name});
   if(result.error){showGameError(result.error);return;}
@@ -1459,8 +1371,8 @@ async function clickSit(seat){
 async function clickLeave(){render(await api('/api/stand','POST',{clientId:MY_CLIENT_ID}));}
 async function clickStart(){
   if(mySeat===null){
-    const name = getMyName();
-    if(!name){ showGameError('Could not determine your name. Please return to lobby.'); return; }
+    const name=getMyName();
+    if(!name){showGameError('Could not determine your name. Please return to lobby.');return;}
     const st=lastState;
     const free=st?[0,1,2,3].find(i=>!st.seats[i]||st.aiTakeover?.[i]):0;
     const seat=free!==undefined?free:0;
@@ -1477,10 +1389,9 @@ async function sendBid(action,val){Sounds.bid();render(await api('/api/bid','POS
 async function sendTrump(suit){Sounds.trump();render(await api('/api/trump','POST',{seat:mySeat,clientId:MY_CLIENT_ID,suit}));}
 async function clickRevealTrump(){Sounds.trump();render(await api('/api/reveal-trump','POST',{seat:mySeat,clientId:MY_CLIENT_ID}));}
 function clickNotNow(){
-  // Record the current trick count so we don't re-show until the next trick
-  var trickCount = lastState && lastState.currentTrick ? lastState.currentTrick.length : 0;
-  var handNum = lastState ? (lastState.handNumber||0) : 0;
-  _trumpDismissedForTurn = handNum * 100 + trickCount;
+  var trickCount=lastState&&lastState.currentTrick?lastState.currentTrick.length:0;
+  var handNum=lastState?(lastState.handNumber||0):0;
+  _trumpDismissedForTurn=handNum*100+trickCount;
   document.getElementById('trumpBtnGroup').style.display='none';
 }
 async function sendBidCustom(){
@@ -1491,25 +1402,19 @@ async function sendBidCustom(){
   await sendBid('bid',parseInt(raw));
 }
 async function goLobby(){
-  if(mySeat!==null){
-    try{await api('/api/stand','POST',{clientId:MY_CLIENT_ID});}catch(e){}
-  }
+  if(mySeat!==null){try{await api('/api/stand','POST',{clientId:MY_CLIENT_ID});}catch(e){}}
   window.location.href='/lobby';
 }
 
 // ── POLLING ──────────────────────────────────────────────
-var _prevPhase='', _prevHandNum=0;
+var _prevPhase='',_prevHandNum=0;
 async function poll(){
   try{
     const st=await api('/api/state');
     if(st&&st.phase){
-      // Reset last trick display when a new hand begins
-      if(st.handNumber!==_prevHandNum && st.phase==='playing' && (!st.currentTrick||st.currentTrick.length===0)){
-        lastTrick=null;
-        _prevHandNum=st.handNumber;
-        _trumpDismissedForTurn=-1; // reset on new hand
+      if(st.handNumber!==_prevHandNum&&st.phase==='playing'&&(!st.currentTrick||st.currentTrick.length===0)){
+        lastTrick=null;_prevHandNum=st.handNumber;_trumpDismissedForTurn=-1;
       }
-      // Sound triggers on phase transitions
       if(_prevPhase!==st.phase){
         if(st.phase==='waiting'&&_prevPhase==='')Sounds.enter();
         if((st.phase==='finished'||st.phase==='matchOver')&&_prevPhase==='playing'){
@@ -1524,150 +1429,96 @@ async function poll(){
     }
   }catch(e){}
 }
-// Play enter sound on load
 setTimeout(()=>Sounds.enter(),400);
 poll();
 setInterval(poll,2000);
 
 // ── ROOM EDITOR ──────────────────────────────────────────
-let _reImgB64 = null;
-
+let _reImgB64=null;
 function openRoomEditor(){
-  const st = lastState;
-  if(!st) return;
-  const modal = document.getElementById('roomEditorModal');
-  // Populate theme values from current state
-  const theme = st.theme || {};
-  document.getElementById('reBg').value     = theme.bgColor    || '#06080d';
-  document.getElementById('reTable').value  = theme.tableColor || '#0a1828';
-  document.getElementById('reBorder').value = theme.borderColor|| '#1c2f50';
-  document.getElementById('reAccent').value = theme.accentColor|| '#ffd54f';
-  _reImgB64 = theme.bgImage || null;
-  const prev = document.getElementById('reImgPreview');
-  const clearBtn = document.getElementById('reClearImg');
-  if(_reImgB64){ prev.src=_reImgB64; prev.style.display='block'; clearBtn.style.display='block'; }
-  else { prev.style.display='none'; clearBtn.style.display='none'; }
-  // Populate conditions
-  const cond = st.conditions || {};
-  const gToggle = document.getElementById('reToggleGuests');
-  const sToggle = document.getElementById('reToggleSpectator');
-  if(cond.allowGuests !== false) gToggle.classList.add('on'); else gToggle.classList.remove('on');
-  if(cond.spectatorMode) sToggle.classList.add('on'); else sToggle.classList.remove('on');
-  document.getElementById('reEntryCost').value = cond.entryCost || 0;
-  document.getElementById('reMinChips').value  = cond.minChips  || 0;
-  document.getElementById('reErr').textContent = '';
-  document.getElementById('reOk').textContent  = '';
+  const st=lastState;if(!st)return;
+  const modal=document.getElementById('roomEditorModal');
+  const theme=st.theme||{};
+  document.getElementById('reBg').value=theme.bgColor||'#06080d';
+  document.getElementById('reTable').value=theme.tableColor||'#0a1828';
+  document.getElementById('reBorder').value=theme.borderColor||'#1c2f50';
+  document.getElementById('reAccent').value=theme.accentColor||'#ffd54f';
+  _reImgB64=theme.bgImage||null;
+  const prev=document.getElementById('reImgPreview');
+  const clearBtn=document.getElementById('reClearImg');
+  if(_reImgB64){prev.src=_reImgB64;prev.style.display='block';clearBtn.style.display='block';}
+  else{prev.style.display='none';clearBtn.style.display='none';}
+  const cond=st.conditions||{};
+  const gToggle=document.getElementById('reToggleGuests');
+  const sToggle=document.getElementById('reToggleSpectator');
+  if(cond.allowGuests!==false)gToggle.classList.add('on');else gToggle.classList.remove('on');
+  if(cond.spectatorMode)sToggle.classList.add('on');else sToggle.classList.remove('on');
+  document.getElementById('reEntryCost').value=cond.entryCost||0;
+  document.getElementById('reMinChips').value=cond.minChips||0;
+  document.getElementById('reErr').textContent='';
+  document.getElementById('reOk').textContent='';
   switchReTab('theme');
-  modal.style.display = 'flex';
+  modal.style.display='flex';
 }
-
-function closeRoomEditor(){
-  document.getElementById('roomEditorModal').style.display='none';
-}
-
+function closeRoomEditor(){document.getElementById('roomEditorModal').style.display='none';}
 function switchReTab(tab){
-  document.getElementById('reThemePane').style.display = tab==='theme'?'block':'none';
-  document.getElementById('reRulesPane').style.display = tab==='rules'?'block':'none';
-  document.getElementById('reTabTheme').style.cssText += tab==='theme'
-    ? ';color:#8ab4f8;border-bottom:2px solid #4a90d9;'
-    : ';color:#2a5080;border-bottom:2px solid transparent;';
-  document.getElementById('reTabRules').style.cssText += tab==='rules'
-    ? ';color:#8ab4f8;border-bottom:2px solid #4a90d9;'
-    : ';color:#2a5080;border-bottom:2px solid transparent;';
+  document.getElementById('reThemePane').style.display=tab==='theme'?'block':'none';
+  document.getElementById('reRulesPane').style.display=tab==='rules'?'block':'none';
+  document.getElementById('reTabTheme').style.cssText+=tab==='theme'?';color:#8ab4f8;border-bottom:2px solid #4a90d9;':';color:#2a5080;border-bottom:2px solid transparent;';
+  document.getElementById('reTabRules').style.cssText+=tab==='rules'?';color:#8ab4f8;border-bottom:2px solid #4a90d9;':';color:#2a5080;border-bottom:2px solid transparent;';
 }
-
 function handleReImg(input){
-  const file = input.files[0]; if(!file) return;
-  const hint = document.getElementById('reImgHint');
-  if(file.size > 500*1024){ hint.textContent='⚠️ Image too large (max 500KB)'; return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    _reImgB64 = e.target.result;
-    const prev = document.getElementById('reImgPreview');
-    prev.src = _reImgB64; prev.style.display='block';
+  const file=input.files[0];if(!file)return;
+  const hint=document.getElementById('reImgHint');
+  if(file.size>500*1024){hint.textContent='⚠️ Image too large (max 500KB)';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    _reImgB64=e.target.result;
+    const prev=document.getElementById('reImgPreview');
+    prev.src=_reImgB64;prev.style.display='block';
     document.getElementById('reClearImg').style.display='block';
     hint.textContent='✅ Image ready';
   };
   reader.readAsDataURL(file);
 }
-
 function clearReImg(){
-  _reImgB64 = null;
+  _reImgB64=null;
   document.getElementById('reImgPreview').style.display='none';
   document.getElementById('reClearImg').style.display='none';
   document.getElementById('reImgInput').value='';
   document.getElementById('reImgHint').textContent='JPG/PNG — used as room background';
 }
-
 function applyReTheme(){
-  const theme = {
-    bgColor:    document.getElementById('reBg').value,
-    tableColor: document.getElementById('reTable').value,
-    borderColor:document.getElementById('reBorder').value,
-    accentColor:document.getElementById('reAccent').value,
-    bgImage:    _reImgB64,
-  };
-  applyTheme(theme);
-  // Force re-apply
-  _themeApplied = false;
-  if(lastState){ lastState.theme = theme; applyTheme(theme); _themeApplied=true; }
-  document.getElementById('reOk').textContent = '✅ Preview applied!';
-  setTimeout(()=>{ const el=document.getElementById('reOk'); if(el) el.textContent=''; },2000);
+  const theme={bgColor:document.getElementById('reBg').value,tableColor:document.getElementById('reTable').value,borderColor:document.getElementById('reBorder').value,accentColor:document.getElementById('reAccent').value,bgImage:_reImgB64};
+  applyTheme(theme);_themeApplied=false;
+  if(lastState){lastState.theme=theme;applyTheme(theme);_themeApplied=true;}
+  document.getElementById('reOk').textContent='✅ Preview applied!';
+  setTimeout(()=>{const el=document.getElementById('reOk');if(el)el.textContent='';},2000);
 }
-
 async function saveRoomEditor(){
-  const errEl = document.getElementById('reErr');
-  const okEl  = document.getElementById('reOk');
-  errEl.textContent=''; okEl.textContent='Saving…';
-
-  const theme = {
-    bgColor:    document.getElementById('reBg').value,
-    tableColor: document.getElementById('reTable').value,
-    borderColor:document.getElementById('reBorder').value,
-    accentColor:document.getElementById('reAccent').value,
-    bgImage:    _reImgB64,
-  };
-  const conditions = {
-    allowGuests:  document.getElementById('reToggleGuests').classList.contains('on'),
-    spectatorMode:document.getElementById('reToggleSpectator').classList.contains('on'),
-    entryCost:    parseInt(document.getElementById('reEntryCost').value)||0,
-    minChips:     parseInt(document.getElementById('reMinChips').value)||0,
-  };
-
+  const errEl=document.getElementById('reErr');
+  const okEl=document.getElementById('reOk');
+  errEl.textContent='';okEl.textContent='Saving…';
+  const theme={bgColor:document.getElementById('reBg').value,tableColor:document.getElementById('reTable').value,borderColor:document.getElementById('reBorder').value,accentColor:document.getElementById('reAccent').value,bgImage:_reImgB64};
+  const conditions={allowGuests:document.getElementById('reToggleGuests').classList.contains('on'),spectatorMode:document.getElementById('reToggleSpectator').classList.contains('on'),entryCost:parseInt(document.getElementById('reEntryCost').value)||0,minChips:parseInt(document.getElementById('reMinChips').value)||0};
   try{
-    // Save conditions
-    const r1 = await fetch('/api/room/conditions',{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','Authorization':AUTH_TOKEN?'Bearer '+AUTH_TOKEN:''},
-      body:JSON.stringify({roomId:ROOM_ID, token:AUTH_TOKEN||undefined, ...conditions})
-    });
-    const d1 = await r1.json();
-    if(!d1.ok){ errEl.textContent=d1.error||'Failed to save conditions.'; okEl.textContent=''; return; }
-
-    // Save theme
-    const r2 = await fetch('/api/room/theme',{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json','Authorization':AUTH_TOKEN?'Bearer '+AUTH_TOKEN:''},
-      body:JSON.stringify({roomId:ROOM_ID, token:AUTH_TOKEN||undefined, theme})
-    });
-    const d2 = await r2.json();
-    if(!d2.ok){ errEl.textContent=d2.error||'Failed to save theme.'; okEl.textContent=''; return; }
-
-    // Apply locally
-    applyTheme(theme); _themeApplied=true;
-    if(lastState){ lastState.theme=theme; lastState.conditions=conditions; }
+    const r1=await fetch('/api/room/conditions',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':AUTH_TOKEN?'Bearer '+AUTH_TOKEN:''},body:JSON.stringify({roomId:ROOM_ID,token:AUTH_TOKEN||undefined,...conditions})});
+    const d1=await r1.json();
+    if(!d1.ok){errEl.textContent=d1.error||'Failed to save conditions.';okEl.textContent='';return;}
+    const r2=await fetch('/api/room/theme',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':AUTH_TOKEN?'Bearer '+AUTH_TOKEN:''},body:JSON.stringify({roomId:ROOM_ID,token:AUTH_TOKEN||undefined,theme})});
+    const d2=await r2.json();
+    if(!d2.ok){errEl.textContent=d2.error||'Failed to save theme.';okEl.textContent='';return;}
+    applyTheme(theme);_themeApplied=true;
+    if(lastState){lastState.theme=theme;lastState.conditions=conditions;}
     okEl.textContent='✅ Saved!';
-    setTimeout(closeRoomEditor, 1000);
-  } catch(e){
-    errEl.textContent='Network error.'; okEl.textContent='';
-  }
+    setTimeout(closeRoomEditor,1000);
+  }catch(e){errEl.textContent='Network error.';okEl.textContent='';}
 }
 </script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .catch(e => console.warn('SW registration failed:', e));
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW registration failed:',e));
   });
 }
 </script>
