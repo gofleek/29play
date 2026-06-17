@@ -348,30 +348,39 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 }
 
 /* ── LANDSCAPE PHONE — the key fix ── */
-/* Target by height so it works regardless of width (fixes Android WebView) */
+/* Target by height ONLY so it works regardless of width or nav-bar visibility (fixes Android WebView) */
 @media(max-height:500px) and (orientation:landscape){
   #rotateNudge{display:none!important;}
 
   :root{
     --hand-h: 100px;
     --mlh-h: 0px;
-    --score-side-w: 56px;
+    --score-side-w: 78px;
   }
 
-  /* Score panel compact */
+  /* Force desktop rightPanel OFF in landscape phone regardless of width */
+  #rightPanel{display:none!important;}
+
+  /* Score panel compact — bigger fonts than before per request */
   #scorePanel{
+    display:flex!important;
     width:var(--score-side-w)!important;
-    padding:4px 3px!important;
+    padding:5px 4px!important;
     bottom:0!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:3px!important;
   }
-  .sp-pts{font-size:14px!important;}
-  .sp-team{font-size:9px!important;}
-  .sp-val{font-size:9px!important;}
-  .sp-lbl{font-size:8px!important;}
-  .sp-divider{margin:2px 0!important;}
-  .sp-row{margin-bottom:2px!important;}
-  .tb-suit{font-size:14px!important;}
-  .tb-label{font-size:8px!important;}
+  .sp-row{flex-direction:row!important;margin-bottom:2px!important;gap:4px!important;}
+  .sp-pts{font-size:17px!important;}
+  .sp-team{font-size:11px!important;}
+  .sp-val{font-size:12px!important;}
+  .sp-lbl{font-size:10px!important;}
+  .sp-divider{margin:3px 0!important;}
+  .sp-row2{gap:4px!important;}
+  #trumpBadge{margin-top:3px!important;padding-top:3px!important;gap:4px!important;}
+  .tb-suit{font-size:18px!important;}
+  .tb-label{font-size:10px!important;}
 
   /* Hand strip: horizontal row */
   #handStrip{
@@ -382,8 +391,8 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
     overflow-y:hidden!important;
     -webkit-align-items:center!important;
     align-items:center!important;
-    -webkit-justify-content:flex-start!important;
-    justify-content:flex-start!important;
+    -webkit-justify-content:center!important;
+    justify-content:center!important;
     padding:4px 8px!important;
   }
 
@@ -403,7 +412,7 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
   }
   #handInner::-webkit-scrollbar{height:3px;width:0;}
 
-  /* Smaller cards */
+  /* Cards kept same size as requested — unchanged from base mobile sizing */
   .card{
     width:clamp(38px,7vh,56px)!important;
     height:clamp(54px,10vh,78px)!important;
@@ -417,11 +426,12 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
 
   /* Trump buttons compact */
   #trumpBtnGroup{gap:3px!important;margin-left:5px!important;}
-  #revealTrumpBtn{font-size:9px!important;padding:4px 7px!important;}
-  #notNowBtn{font-size:8px!important;padding:3px 7px!important;}
+  #revealTrumpBtn{font-size:10px!important;padding:4px 7px!important;}
+  #notNowBtn{font-size:9px!important;padding:3px 7px!important;}
 
   /* Hide last hand strip in landscape — no space for it */
   #mobileLastHand{display:none!important;}
+  #mobileTrickPanel{display:none!important;}
 
   /* Table area: fill available space above hand strip */
   .table-area{
@@ -438,20 +448,25 @@ html,body{width:100%;height:100%;background:#06080d;color:#e8eaf6;overflow:hidde
     height:40px!important;
   }
 
-  /* Felt table: use available height to size */
+  /* Felt table: smaller than before per request — reduced multiplier and margin */
   .felt-table{
     width:min(
-      calc(100% - 4px),
-      calc((100vh - var(--topbar-h) - var(--hand-h) - 4px) * 1.85)
+      calc(100% - 40px),
+      calc((100vh - var(--topbar-h) - var(--hand-h) - 4px) * 1.55)
     )!important;
   }
 
-  /* Trick grid: smaller in landscape */
-  .trick-grid{--tg:clamp(140px,38vh,220px)!important;}
+  /* Trick grid: smaller in landscape, scaled with smaller table */
+  .trick-grid{--tg:clamp(120px,32vh,190px)!important;}
   .tslot{
-    width:clamp(36px,6vh,56px)!important;
-    height:clamp(50px,8.5vh,78px)!important;
+    width:clamp(32px,5.5vh,50px)!important;
+    height:clamp(46px,7.8vh,70px)!important;
   }
+
+  /* Plaques: slightly bigger font since table shrank, keep legible */
+  .plaque{padding:4px 9px!important;}
+  .plaque .p-seat{font-size:9px!important;}
+  .plaque .p-name{font-size:12px!important;}
 }
 
 #handInner{display:-webkit-flex;display:flex;gap:clamp(4px,.8vw,8px);-webkit-align-items:flex-end;align-items:flex-end;overflow-x:auto;overflow-y:visible;padding:6px 4px 8px;max-width:100%;scrollbar-width:thin;scrollbar-color:#2a3a50 transparent;-webkit-overflow-scrolling:touch;}
@@ -887,6 +902,10 @@ function render(st){
   const tableArea = document.querySelector('.table-area');
   const landscape = isLandscapePhone();
   const mlh = document.getElementById('mobileLastHand');
+  const rightPanel = document.getElementById('rightPanel');
+
+  // Belt-and-suspenders: force rightPanel off on landscape phones regardless of width
+  if(rightPanel) rightPanel.style.display = landscape ? 'none' : '';
 
   if(seated){
     document.getElementById('handStrip').style.display='flex';
@@ -951,9 +970,10 @@ function renderTopbar(st,seated){
 function renderScorePanel(st){
   const inGame=['bidding','trump','playing','finished','matchOver'].includes(st.phase);
   const panel=document.getElementById('scorePanel');
-  const isMobile=window.innerWidth<=680||isLandscapePhone();
+  // Landscape phone (by height) OR portrait mobile (by width) — never both conditions misfiring
+  const isMobile=isLandscapePhone()||window.innerWidth<=680;
   if(!inGame){panel.style.display='none';return;}
-  panel.style.display=isMobile?'flex':'block';
+  panel.style.display='flex';
   const t1=st.team1Score||0,t2=st.team2Score||0;
   const e1=document.getElementById('spT1'),e2=document.getElementById('spT2');
   e1.textContent=(t1>0?'+':'')+t1;e1.style.color=t1>0?'#4fc3f7':t1<0?'#ef5350':'#8ab4f8';
